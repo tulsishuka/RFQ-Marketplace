@@ -16,6 +16,8 @@ import BuyerRFQDetails from "./pages/buyer/BuyerRFQDetails";
 import SupplierDashboardLayout from "./pages/supplier/SuppierDashboardLayout";
 import SupplierDashboard from "./pages/supplier/SupplierDashboard";
 import BrowseRFQs from "./pages/supplier/BrowseRFQs";
+import SupplierRFQDetails from "./pages/supplier/SupplierRFQDetails";
+import MyQuotations from "./pages/supplier/MyQuotations";
 
 const MainPage = () => {
   return (
@@ -56,6 +58,10 @@ function App() {
   <Route index element={<SupplierDashboard />} />
   <Route path="dashboard" element={<SupplierDashboard />} />
   <Route path="browse-rfqs" element={<BrowseRFQs />} />
+    <Route path="supplierdetail" element={<SupplierRFQDetails />} />
+        <Route path="myquotation" element={<MyQuotations />} />
+
+
 </Route>
     </Routes>
   );
