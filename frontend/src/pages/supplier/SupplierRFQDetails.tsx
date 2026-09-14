@@ -1,398 +1,556 @@
-import{ useState } from 'react';
+
+import { useEffect, useState } from "react";
+import {
+  useNavigate,
+  useParams,
+} from "react-router-dom";
+
 import {
   ArrowLeft,
+  MapPin,
   Calendar,
-  Clock,
-  Copy,
-  Building2,
-  ShieldCheck,
+  Package,
   FileText,
-  CheckCircle2,
-  Truck,
-  IndianRupee,
-  Info,
-  Layers,
-  Sliders,
-  Palette,
-  Send
-} from 'lucide-react';
+  Send,
+} from "lucide-react";
+
+interface RFQ {
+  _id: string;
+  productService: string;
+  description: string;
+  quantity: number;
+  unit: "Units" | "Pcs" | "Bays" | "Kg";
+  deliveryLocation: string;
+  deadline: string;
+  images: string[];
+  status: "open" | "closed";
+  createdAt: string;
+  buyer?: {
+    name: string;
+    email: string;
+  };
+}
 
 const SupplierRFQDetails = () => {
-  const [quotedPrice, setQuotedPrice] = useState('');
-  const [deliveryTime, setDeliveryTime] = useState('');
-  const [message, setMessage] = useState('');
+  const navigate = useNavigate();
+  const { id } = useParams();
 
-  const handleCopyId = () => {
-    navigator.clipboard.writeText('RFQ-2026-0891');
-    alert('RFQ ID copied to clipboard!');
+  const [rfq, setRfq] =
+    useState<RFQ | null>(null);
+
+  const [price, setPrice] = useState("");
+  const [deliveryTime, setDeliveryTime] =
+    useState("");
+  const [message, setMessage] =
+    useState("");
+
+  const [loading, setLoading] =
+    useState(true);
+
+  const [submitting, setSubmitting] =
+    useState(false);
+
+  const [error, setError] =
+    useState("");
+
+  const [success, setSuccess] =
+    useState("");
+
+  // ==========================================
+  // FETCH RFQ
+  // ==========================================
+
+  const fetchRFQ = async () => {
+    try {
+      const token =
+        localStorage.getItem("token");
+
+      if (!token) {
+        setError("Please login first.");
+        return;
+      }
+
+      const response = await fetch(
+        `http://localhost:3000/api/supplier/rfqs/${id}`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        setError(
+          data.message ||
+            "Failed to fetch RFQ."
+        );
+        return;
+      }
+
+      setRfq(data.rfq);
+    } catch (error) {
+      console.error(error);
+
+      setError(
+        "Unable to connect to server."
+      );
+    } finally {
+      setLoading(false);
+    }
   };
 
-  const handleSubmitQuote = (e) => {
+  useEffect(() => {
+    fetchRFQ();
+  }, [id]);
+
+
+  // ==========================================
+  // SUBMIT QUOTATION
+  // ==========================================
+
+  const handleSubmit = async (
+    e: React.FormEvent
+  ) => {
     e.preventDefault();
-    alert('Quotation submitted successfully!');
+
+    setError("");
+    setSuccess("");
+
+    if (!price || !deliveryTime) {
+      setError(
+        "Price and delivery time are required."
+      );
+
+      return;
+    }
+
+    try {
+      setSubmitting(true);
+
+      const token =
+        localStorage.getItem("token");
+
+      const response = await fetch(
+        `http://localhost:3000/api/supplier/rfqs/${id}/quotes`,
+        {
+          method: "POST",
+
+          headers: {
+            "Content-Type":
+              "application/json",
+
+            Authorization: `Bearer ${token}`,
+          },
+
+          body: JSON.stringify({
+            price: Number(price),
+            deliveryTime,
+            message,
+          }),
+        }
+      );
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        setError(
+          data.message ||
+            "Failed to submit quotation."
+        );
+
+        return;
+      }
+
+      setSuccess(
+        "Quotation submitted successfully!"
+      );
+
+      setPrice("");
+      setDeliveryTime("");
+      setMessage("");
+
+    } catch (error) {
+      console.error(error);
+
+      setError(
+        "Unable to connect to server."
+      );
+    } finally {
+      setSubmitting(false);
+    }
   };
+
+
+  // ==========================================
+  // LOADING
+  // ==========================================
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center min-h-[70vh]">
+
+        <div className="w-10 h-10 border-4 border-blue-200 border-t-blue-600 rounded-full animate-spin" />
+
+      </div>
+    );
+  }
+
+
+  // ==========================================
+  // ERROR
+  // ==========================================
+
+  if (!rfq) {
+    return (
+      <div className="p-8 text-center">
+
+        <p className="text-red-600">
+          {error || "RFQ not found."}
+        </p>
+
+        <button
+          onClick={() =>
+            navigate(
+              "/supplier/browse-rfqs"
+            )
+          }
+          className="mt-4 px-4 py-2 bg-blue-700 text-white rounded-lg"
+        >
+          Back to RFQs
+        </button>
+
+      </div>
+    );
+  }
+
+
+  const formatDate = (date: string) =>
+    new Date(date).toLocaleDateString(
+      "en-IN",
+      {
+        day: "2-digit",
+        month: "long",
+        year: "numeric",
+      }
+    );
+
 
   return (
-    <div className="min-h-screen bg-slate-50/50 p-4 md:p-8 max-w-7xl mx-auto space-y-6 text-slate-800">
-      
-      {/* 1. Global Header Navbar Navigation */}
-      <div className="flex flex-wrap items-center justify-between text-xs text-slate-500 pb-3 border-b border-slate-200/60 gap-2">
-        <div className="flex items-center gap-2">
-          <span className="font-bold text-slate-900">RFQHub</span>
-          <span>/</span>
-          <span className="bg-blue-50 text-blue-700 font-semibold px-2 py-0.5 rounded text-[10px]">
-            SUPPLIER PORTAL
-          </span>
-          <span>/</span>
-          <span>Supplier Workspace / Seller Console</span>
-        </div>
-        
-        <div className="flex items-center gap-3">
-          <span className="bg-emerald-50 text-emerald-700 font-bold px-2.5 py-1 rounded-full text-[11px] flex items-center gap-1">
-            <span className="w-1.5 h-1.5 rounded-full bg-emerald-500"></span> Active Seller
-          </span>
-          <div className="flex items-center gap-2">
-            <div className="w-7 h-7 rounded-full bg-blue-600 text-white font-bold flex items-center justify-center text-xs">
-              VM
-            </div>
-            <div className="text-left text-[11px]">
-              <p className="font-bold text-slate-900 leading-tight">Vikram Mehta <span className="text-[9px] bg-slate-200 px-1 rounded text-slate-600 font-medium">SUPPLIER</span></p>
-              <p className="text-slate-400 text-[10px]">Apex Industrial Supplies</p>
-            </div>
-          </div>
-        </div>
-      </div>
+    <div className="max-w-7xl mx-auto space-y-6">
 
-      {/* 2. Secondary Navigation & Metadata Ribbon */}
-      <div className="flex flex-wrap items-center justify-between gap-3 text-xs">
-        <div className="flex flex-wrap items-center gap-4 text-slate-500">
-          <button className="flex items-center gap-1.5 text-blue-700 font-semibold hover:underline">
-            <ArrowLeft size={14} /> Back to Browse RFQs
-          </button>
-          <span className="text-slate-300">|</span>
-          <span className="font-mono font-bold text-slate-700">RFQ-2026-0891</span>
-          <span className="text-slate-300">•</span>
-          <span className="flex items-center gap-1">
-            <Calendar size={13} className="text-slate-400" /> Posted: 08 Sep 2026
-          </span>
-          <span className="text-slate-300">•</span>
-          <span className="flex items-center gap-1 text-slate-700 font-medium">
-            <Clock size={13} className="text-slate-400" /> Deadline: 30 Sep 2026 (23:59 IST)
-          </span>
-        </div>
+      {/* Back */}
 
-        <span className="bg-emerald-100/80 text-emerald-800 font-bold px-3 py-1 rounded-full text-[10px] uppercase tracking-wider flex items-center gap-1">
-          <span className="w-1.5 h-1.5 rounded-full bg-emerald-600"></span> OPEN FOR BIDDING
-        </span>
-      </div>
+      <button
+        onClick={() =>
+          navigate(
+            "/supplier/browse-rfqs"
+          )
+        }
+        className="flex items-center gap-2 text-sm text-slate-500 hover:text-slate-900"
+      >
+        <ArrowLeft size={16} />
 
-      {/* 3. Page Title & Live Bids Counter */}
-      <div className="bg-white p-6 rounded-2xl border border-slate-100 shadow-sm flex flex-col md:flex-row md:items-center justify-between gap-4">
-        <div>
-          <div className="flex items-center gap-2 mb-1">
-            <span className="bg-blue-100 text-blue-700 font-bold px-2 py-0.5 rounded text-[10px]">
-              STANDARD RFQ SPECIFICATION
-            </span>
-            <span className="text-slate-400 text-[11px]">Commercial Grade</span>
-          </div>
-          <h1 className="text-2xl font-bold text-slate-900">RFQ Details: Office Chairs</h1>
-          <p className="text-slate-500 text-xs mt-0.5">
-            Review the verified buyer specification and submit your quotation proposal.
-          </p>
-        </div>
+        Back to Browse RFQs
+      </button>
 
-        <div className="bg-blue-50/60 border border-blue-100 px-5 py-3 rounded-xl text-right self-start md:self-auto">
-          <p className="text-[10px] font-bold uppercase tracking-wider text-blue-600">COMPETITIVE BIDS ACTIVE</p>
-          <p className="text-2xl font-extrabold text-blue-900">6 Received</p>
-        </div>
-      </div>
 
-      {/* 4. Buyer Requirement Main Card */}
-      <div className="bg-white rounded-2xl border border-slate-100 shadow-sm overflow-hidden">
-        
-        {/* Buyer Header Banner */}
-        <div className="p-5 bg-slate-50/60 border-b border-slate-100 flex items-center justify-between flex-wrap gap-3">
-          <div className="flex items-center gap-3">
-            <div className="p-2.5 bg-blue-600 text-white rounded-xl">
-              <Building2 size={20} />
-            </div>
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+
+        {/* ================================= */}
+        {/* RFQ DETAILS */}
+        {/* ================================= */}
+
+        <div className="lg:col-span-2 bg-white rounded-2xl border border-slate-100 shadow-sm p-6">
+
+          <div className="flex items-start justify-between gap-4">
+
             <div>
-              <div className="flex items-center gap-2">
-                <h2 className="font-bold text-slate-900 text-sm">Buyer Requirement</h2>
-              </div>
-              <div className="flex items-center gap-2 text-xs text-slate-500">
-                <span className="font-semibold text-slate-800">ProcureCorp Solutions Ltd.</span>
-                <span className="flex items-center gap-0.5 text-blue-600 font-medium text-[11px]">
-                  <ShieldCheck size={13} /> Verified Corporate Buyer
-                </span>
-                <span>•</span>
-                <span className="text-[11px] text-slate-400">Enterprise Account</span>
-              </div>
-            </div>
-          </div>
 
-          <button
-            onClick={handleCopyId}
-            className="flex items-center gap-1.5 px-3 py-1.5 bg-white border border-slate-200 text-slate-700 text-xs rounded-xl hover:bg-slate-50 transition-colors shadow-xs"
-          >
-            <Copy size={13} /> Copy RFQ ID
-          </button>
-        </div>
+              <h1 className="text-2xl font-bold text-slate-900">
+                {rfq.productService}
+              </h1>
 
-        {/* Overview Key Metrics Row */}
-        <div className="p-5 grid grid-cols-2 md:grid-cols-5 gap-4 border-b border-slate-100 text-xs">
-          <div>
-            <span className="text-[9px] font-bold text-slate-400 uppercase tracking-wider block">PRODUCT / SERVICE</span>
-            <p className="font-bold text-slate-900 text-sm mt-0.5">Office Chairs</p>
-            <p className="text-[10px] text-slate-500">High-back ergonomic</p>
-          </div>
-          <div>
-            <span className="text-[9px] font-bold text-slate-400 uppercase tracking-wider block">CATEGORY</span>
-            <p className="font-bold text-slate-900 text-sm mt-0.5">Commercial Office Furniture</p>
-            <p className="text-[10px] text-slate-500">Workspace Interiors</p>
-          </div>
-          <div>
-            <span className="text-[9px] font-bold text-slate-400 uppercase tracking-wider block">REQUIRED QUANTITY</span>
-            <p className="font-bold text-blue-700 text-sm mt-0.5">100 Units</p>
-            <p className="text-[10px] text-slate-500">Single consolidated order</p>
-          </div>
-          <div>
-            <span className="text-[9px] font-bold text-slate-400 uppercase tracking-wider block">DELIVERY LOCATION</span>
-            <p className="font-bold text-slate-900 text-sm mt-0.5">Lucknow, UP</p>
-            <p className="text-[10px] text-slate-500">PIN: 226010</p>
-          </div>
-          <div>
-            <span className="text-[9px] font-bold text-slate-400 uppercase tracking-wider block">TARGET DELIVERY</span>
-            <p className="font-bold text-slate-900 text-sm mt-0.5">Within 30 Days</p>
-            <p className="text-[10px] text-slate-500">Immediate deployment</p>
-          </div>
-        </div>
-
-        {/* Detailed Requirement Body Grid (Left Specs + Right Buyer Credential Card & Image) */}
-        <div className="p-6 grid grid-cols-1 lg:grid-cols-12 gap-6">
-          
-          {/* Left Column: Descriptions & Tech Specs (8 Cols) */}
-          <div className="lg:col-span-8 space-y-5">
-            <div>
-              <h3 className="text-xs font-bold uppercase tracking-wider text-slate-400 mb-2 flex items-center gap-1.5">
-                <FileText size={14} className="text-blue-600" /> FULL REQUIREMENT DESCRIPTION
-              </h3>
-              <p className="text-xs text-slate-700 leading-relaxed bg-slate-50/50 p-4 rounded-xl border border-slate-100">
-                Need 100 ergonomic office chairs for our new regional fulfillment facility. Specifications include: high-density molded foam seat cushion (minimum 45kg/m³ density), breathable double-layer nylon mesh backrest with adjustable lumbar support, 3D adjustable armrests (height, angle, and depth), Class-4 certified pneumatic gas lift cylinder, heavy-duty nylon base with 60mm PU castors, and multi-position tilt lock mechanism with tension control. Must comply with BIFMA X5.1 commercial seating standards. Color preference: Charcoal Gray / Black.
+              <p className="text-sm text-slate-500 mt-1">
+                Posted on{" "}
+                {formatDate(
+                  rfq.createdAt
+                )}
               </p>
+
             </div>
 
-            {/* Technical Bullet Spec Badges */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-              <div className="bg-slate-50 p-3.5 rounded-xl border border-slate-100 flex items-start gap-3">
-                <CheckCircle2 size={16} className="text-blue-600 mt-0.5 flex-shrink-0" />
-                <div>
-                  <h4 className="text-xs font-bold text-slate-900">BIFMA X5.1 Standard</h4>
-                  <p className="text-[11px] text-slate-500 mt-0.5">Mandatory compliance testing certificate required</p>
-                </div>
-              </div>
-
-              <div className="bg-slate-50 p-3.5 rounded-xl border border-slate-100 flex items-start gap-3">
-                <Layers size={16} className="text-blue-600 mt-0.5 flex-shrink-0" />
-                <div>
-                  <h4 className="text-xs font-bold text-slate-900">Foam Density: ≥45 kg/m³</h4>
-                  <p className="text-[11px] text-slate-500 mt-0.5">Pure virgin molded PU foam cushion</p>
-                </div>
-              </div>
-
-              <div className="bg-slate-50 p-3.5 rounded-xl border border-slate-100 flex items-start gap-3">
-                <Sliders size={16} className="text-blue-600 mt-0.5 flex-shrink-0" />
-                <div>
-                  <h4 className="text-xs font-bold text-slate-900">Class-4 Gas Lift Cylinder</h4>
-                  <p className="text-[11px] text-slate-500 mt-0.5">Heavy-duty pneumatic stroke (100mm–120mm)</p>
-                </div>
-              </div>
-
-              <div className="bg-slate-50 p-3.5 rounded-xl border border-slate-100 flex items-start gap-3">
-                <Palette size={16} className="text-blue-600 mt-0.5 flex-shrink-0" />
-                <div>
-                  <h4 className="text-xs font-bold text-slate-900">Tone: Charcoal Gray / Black</h4>
-                  <p className="text-[11px] text-slate-500 mt-0.5">Anti-dust nylon mesh with matte black framework</p>
-                </div>
-              </div>
-            </div>
-
-            {/* Logistics Box */}
-            <div className="bg-blue-50/40 p-4 rounded-xl border border-blue-100 text-xs text-blue-950 flex items-start gap-3">
-              <Truck size={18} className="text-blue-600 flex-shrink-0 mt-0.5" />
-              <div>
-                <h4 className="font-bold text-slate-900">Logistics & Packaging Requirements</h4>
-                <p className="text-slate-600 text-[11px] mt-0.5 leading-relaxed">
-                  All units to be flat-packed or pre-assembled with manual tools and hardware included. Palletized delivery to ground-floor unloading bay in Lucknow. Standard warehouse unloading dock available.
-                </p>
-              </div>
-            </div>
-          </div>
-
-          {/* Right Column: Buyer Credential Check & Visual Reference (4 Cols) */}
-          <div className="lg:col-span-4 space-y-4">
-            
-            {/* Buyer Credential Box */}
-            <div className="bg-slate-50 p-4 rounded-2xl border border-slate-100 space-y-3">
-              <h4 className="text-[10px] font-bold text-slate-400 uppercase tracking-wider flex items-center gap-1">
-                BUYER CREDENTIAL CHECK
-              </h4>
-
-              <div className="flex items-center gap-2.5">
-                <div className="w-9 h-9 rounded-xl bg-blue-100 text-blue-700 font-bold flex items-center justify-center text-sm">
-                  P
-                </div>
-                <div>
-                  <h5 className="font-bold text-slate-900 text-xs leading-snug">ProcureCorp Solutions Ltd.</h5>
-                  <p className="text-[10px] text-slate-400">Procurement ID: BUY-2026</p>
-                </div>
-              </div>
-
-              <div className="space-y-1.5 pt-2 border-t border-slate-200/60 text-xs">
-                <div className="flex justify-between">
-                  <span className="text-slate-400 text-[11px]">Payment Terms:</span>
-                  <span className="font-semibold text-slate-800 text-[11px]">Net 30 Days (Invoice)</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-slate-400 text-[11px]">GSTIN Status:</span>
-                  <span className="font-semibold text-emerald-600 text-[11px]">Verified (09AAACK...)</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-slate-400 text-[11px]">Past Awards:</span>
-                  <span className="font-semibold text-slate-800 text-[11px]">24 RFQs Settled</span>
-                </div>
-              </div>
-            </div>
-
-            {/* Reference Image Box */}
-            <div className="relative rounded-2xl overflow-hidden border border-slate-100 shadow-xs group">
-              <img
-                src="https://images.unsplash.com/photo-1580481072645-022f9a6d83d0?auto=format&fit=crop&w=600&q=80"
-                alt="Reference Office Chair"
-                className="w-full h-44 object-cover"
-              />
-              <div className="absolute inset-0 bg-gradient-to-t from-slate-900/80 via-transparent to-transparent flex items-end p-3 justify-between">
-                <span className="text-white text-[11px] font-semibold">Reference Style: Modern High-Back</span>
-                <span className="bg-white/90 backdrop-blur-xs text-slate-900 text-[10px] font-bold px-2 py-0.5 rounded">
-                  100 Units
-                </span>
-              </div>
-            </div>
-
-          </div>
-
-        </div>
-
-      </div>
-
-      {/* 5. Submit Your Quotation Section */}
-      <div className="bg-white rounded-2xl border border-slate-100 shadow-sm p-6 space-y-5">
-        
-        {/* Section Header */}
-        <div className="flex items-center justify-between border-b border-slate-100 pb-4">
-          <div className="flex items-center gap-3">
-            <div className="p-2.5 bg-blue-600 text-white rounded-xl">
-              <Send size={18} />
-            </div>
-            <div>
-              <h2 className="font-bold text-slate-900 text-base">Submit Your Quotation</h2>
-              <p className="text-xs text-slate-500">Provide your best price and delivery estimate to the buyer.</p>
-            </div>
-          </div>
-          <div className="flex items-center gap-2">
-            <span className="text-[10px] font-bold bg-emerald-50 text-emerald-700 px-2.5 py-1 rounded-full border border-emerald-100">
-              Direct Quotation
+            <span className="bg-emerald-100 text-emerald-700 px-3 py-1 rounded-full text-xs font-semibold">
+              {rfq.status}
             </span>
-            <span className="text-[10px] text-slate-400">No Commission Fee</span>
-          </div>
-        </div>
 
-        {/* Notice Box */}
-        <div className="bg-blue-50/50 border border-blue-100 rounded-xl p-3.5 flex items-start gap-2.5 text-xs text-blue-900">
-          <Info size={16} className="text-blue-600 flex-shrink-0 mt-0.5" />
-          <div>
-            <span className="font-bold">Notice: Transparent Quotation System</span>
-            <p className="text-slate-600 text-[11px] mt-0.5">
-              Your message and price are directly visible to the buyer. No separate chat is needed or supported. Quotations are compared directly in the buyer's procurement decision matrix.
+          </div>
+
+
+          {/* Requirement */}
+
+          <div className="mt-6">
+
+            <h2 className="font-bold text-slate-900 flex items-center gap-2">
+
+              <FileText
+                size={18}
+                className="text-blue-600"
+              />
+
+              Requirement
+
+            </h2>
+
+            <p className="mt-3 text-sm text-slate-600 leading-7 bg-slate-50 p-4 rounded-xl">
+              {rfq.description}
             </p>
+
           </div>
+
+
+          {/* Information */}
+
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mt-6">
+
+            <div className="bg-blue-50 p-4 rounded-xl">
+
+              <p className="text-xs text-slate-400">
+                Quantity
+              </p>
+
+              <p className="font-bold text-blue-700 mt-1 flex items-center gap-1">
+
+                <Package size={15} />
+
+                {rfq.quantity}{" "}
+                {rfq.unit}
+
+              </p>
+
+            </div>
+
+
+            <div className="bg-slate-50 p-4 rounded-xl">
+
+              <p className="text-xs text-slate-400">
+                Delivery Location
+              </p>
+
+              <p className="font-bold text-slate-800 mt-1 flex items-center gap-1">
+
+                <MapPin size={15} />
+
+                {rfq.deliveryLocation}
+
+              </p>
+
+            </div>
+
+
+            <div className="bg-red-50 p-4 rounded-xl">
+
+              <p className="text-xs text-slate-400">
+                Quote Deadline
+              </p>
+
+              <p className="font-bold text-red-600 mt-1 flex items-center gap-1">
+
+                <Calendar size={15} />
+
+                {formatDate(
+                  rfq.deadline
+                )}
+
+              </p>
+
+            </div>
+
+          </div>
+
+
+          {/* Buyer */}
+
+          {rfq.buyer && (
+            <div className="mt-6 p-4 border border-slate-100 rounded-xl">
+
+              <p className="text-xs text-slate-400">
+                Buyer
+              </p>
+
+              <p className="font-bold text-slate-900 mt-1">
+                {rfq.buyer.name}
+              </p>
+
+              <p className="text-sm text-slate-500">
+                {rfq.buyer.email}
+              </p>
+
+            </div>
+          )}
+
+
+          {/* Images */}
+
+          {rfq.images?.length > 0 && (
+
+            <div className="mt-6">
+
+              <h2 className="font-bold text-slate-900 mb-3">
+                Reference Images
+              </h2>
+
+              <div className="flex flex-wrap gap-3">
+
+                {rfq.images.map(
+                  (image, index) => (
+
+                    <img
+                      key={index}
+                      src={`http://localhost:3000${image}`}
+                      alt={`RFQ ${index + 1}`}
+                      className="w-32 h-32 object-cover rounded-xl border border-slate-200"
+                    />
+
+                  )
+                )}
+
+              </div>
+
+            </div>
+
+          )}
+
         </div>
 
-        {/* Quotation Input Form */}
-        <form onSubmit={handleSubmitQuote} className="space-y-4">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-            
-            {/* Price Input */}
-            <div className="space-y-1.5">
-              <div className="flex justify-between items-center text-xs">
-                <label className="font-bold text-slate-900">Quoted Price (INR ₹) <span className="text-red-500">*</span></label>
-                <span className="text-slate-400 text-[10px]">Excl. tax</span>
-              </div>
-              <div className="relative">
-                <IndianRupee className="absolute left-3.5 top-3 text-slate-400" size={16} />
-                <input
-                  type="number"
-                  required
-                  value={quotedPrice}
-                  onChange={(e) => setQuotedPrice(e.target.value)}
-                  placeholder="Enter your quoted price (e.g. 2,55,000)"
-                  className="w-full pl-10 pr-4 py-2.5 border border-slate-200 rounded-xl text-xs focus:ring-2 focus:ring-blue-600 outline-none placeholder:text-slate-400 font-medium"
-                />
-              </div>
-              <p className="text-[10px] text-slate-400">Inclusive of GST and standard freight to Lucknow.</p>
+
+        {/* ================================= */}
+        {/* QUOTATION FORM */}
+        {/* ================================= */}
+
+        <div className="bg-white rounded-2xl border border-slate-100 shadow-sm p-6 h-fit">
+
+         <button
+  onClick={() => navigate(`/supplier/rfq/${id}/quotation`)}
+  className="px-6 py-3 bg-black text-white rounded-xl"
+>
+  Submit Quotation
+</button> 
+
+          <p className="text-sm text-slate-500 mt-1">
+            Send your best offer to the buyer.
+          </p>
+
+
+          {/* Error */}
+
+          {error && (
+            <div className="mt-4 bg-red-50 border border-red-100 text-red-600 text-sm p-3 rounded-xl">
+              {error}
+            </div>
+          )}
+
+
+          {/* Success */}
+
+          {success && (
+            <div className="mt-4 bg-emerald-50 border border-emerald-100 text-emerald-700 text-sm p-3 rounded-xl">
+              {success}
+            </div>
+          )}
+
+
+          <form
+            onSubmit={handleSubmit}
+            className="mt-6 space-y-4"
+          >
+
+            {/* Price */}
+
+            <div>
+
+              <label className="text-sm font-semibold text-slate-700">
+                Total Price
+              </label>
+
+              <input
+                type="number"
+                min="0"
+                placeholder="Enter your total price"
+                value={price}
+                onChange={(e) =>
+                  setPrice(e.target.value)
+                }
+                className="w-full mt-2 px-4 py-3 border border-slate-200 rounded-xl outline-none focus:border-blue-500"
+              />
+
             </div>
 
-            {/* Delivery Time Input */}
-            <div className="space-y-1.5">
-              <div className="flex justify-between items-center text-xs">
-                <label className="font-bold text-slate-900">Estimated Delivery Time <span className="text-red-500">*</span></label>
-                <span className="text-slate-400 text-[10px]">Required Target: &lt; 30 days</span>
-              </div>
-              <div className="relative">
-                <input
-                  type="text"
-                  required
-                  value={deliveryTime}
-                  onChange={(e) => setDeliveryTime(e.target.value)}
-                  placeholder="Example: 15 days"
-                  className="w-full pl-4 pr-10 py-2.5 border border-slate-200 rounded-xl text-xs focus:ring-2 focus:ring-blue-600 outline-none placeholder:text-slate-400 font-medium"
-                />
-                <Truck className="absolute right-3.5 top-3 text-slate-400" size={16} />
-              </div>
-              <p className="text-[10px] text-slate-400">Specify lead time from order confirmation to physical delivery.</p>
+
+            {/* Delivery */}
+
+            <div>
+
+              <label className="text-sm font-semibold text-slate-700">
+                Delivery Time
+              </label>
+
+              <input
+                type="text"
+                placeholder="Example: 15 days"
+                value={deliveryTime}
+                onChange={(e) =>
+                  setDeliveryTime(
+                    e.target.value
+                  )
+                }
+                className="w-full mt-2 px-4 py-3 border border-slate-200 rounded-xl outline-none focus:border-blue-500"
+              />
+
             </div>
 
-          </div>
 
-          {/* Message to Buyer */}
-          <div className="space-y-1.5">
-            <div className="flex justify-between items-center text-xs">
-              <label className="font-bold text-slate-900">Message to Buyer <span className="text-red-500">*</span></label>
-              <span className="text-slate-400 text-[10px]">0 / 500 characters (min 50)</span>
+            {/* Message */}
+
+            <div>
+
+              <label className="text-sm font-semibold text-slate-700">
+                Message / Notes
+              </label>
+
+              <textarea
+                rows={5}
+                placeholder="Add delivery terms, offer details or notes..."
+                value={message}
+                onChange={(e) =>
+                  setMessage(e.target.value)
+                }
+                className="w-full mt-2 px-4 py-3 border border-slate-200 rounded-xl outline-none focus:border-blue-500 resize-none"
+              />
+
             </div>
-            <textarea
-              rows={4}
-              required
-              minLength={50}
-              maxLength={500}
-              value={message}
-              onChange={(e) => setMessage(e.target.value)}
-              placeholder="Add a message or additional information for the buyer... (e.g., warranty terms, bulk tier pricing, material specs)"
-              className="w-full p-3.5 border border-slate-200 rounded-xl text-xs focus:ring-2 focus:ring-blue-600 outline-none placeholder:text-slate-400 leading-relaxed"
-            ></textarea>
-            <p className="text-[10px] text-slate-400">This message will be attached directly to your quotation card for the buyer's evaluation.</p>
-          </div>
 
-          {/* Form Actions */}
-          <div className="pt-2 flex justify-end">
+
+            {/* Submit */}
+
             <button
               type="submit"
-              className="px-6 py-3 bg-blue-700 hover:bg-blue-800 text-white font-semibold text-xs rounded-xl shadow-sm transition-colors flex items-center gap-2"
+              disabled={submitting}
+              className="w-full py-3 bg-blue-700 hover:bg-blue-800 disabled:bg-blue-300 text-white rounded-xl font-semibold flex items-center justify-center gap-2 transition"
             >
-              <Send size={14} /> Submit Quotation Proposal
+
+              <Send size={16} />
+
+              {submitting
+                ? "Submitting..."
+                : "Submit Quotation"}
+
             </button>
-          </div>
-        </form>
+
+          </form>
+
+        </div>
 
       </div>
 

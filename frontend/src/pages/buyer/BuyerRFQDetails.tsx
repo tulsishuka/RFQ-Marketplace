@@ -11,6 +11,7 @@ import {
   CheckCircle2,
   ShieldCheck,
   TrendingUp,
+  Star,
   Check,
   MessageSquare,
   Zap,

@@ -7,6 +7,7 @@ import connectDB from "./config/db";
 
 import authRoutes from "./routes/authRoutes";
 import rfqRoutes from "./routes/rfqRoutes";
+import supplierRoutes from "./routes/supplierRoutes";
 
 dotenv.config();
 
@@ -33,6 +34,10 @@ app.use(
 app.use(
   "/api/rfqs",
   rfqRoutes
+);
+app.use(
+  "/api/supplier",
+  supplierRoutes
 );
 
 const PORT = process.env.PORT || 3000;
