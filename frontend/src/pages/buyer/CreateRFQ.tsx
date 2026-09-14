@@ -88,7 +88,7 @@ const CreateRFQ = () => {
         formDataToSend.append("images", image);
       });
 
-      const response = await fetch("http://localhost:3000/api/rfqs", {
+      const response = await fetch("https://rfq-marketplace-502m.onrender.com/api/rfqs", {
         method: "POST",
         headers: {
           Authorization: `Bearer ${token}`,

@@ -50,7 +50,7 @@ const BrowseRFQs = () => {
         return;
       }
 
-      const response = await fetch("http://localhost:3000/api/supplier/rfqs", {
+      const response = await fetch("https://rfq-marketplace-502m.onrender.com/api/supplier/rfqs", {
         headers: {
           Authorization: `Bearer ${token}`,
         },
@@ -92,7 +92,7 @@ const BrowseRFQs = () => {
 
   const getRFQImage = (rfq: RFQ) => {
     if (rfq.images && rfq.images.length > 0) {
-      return `http://localhost:3000${rfq.images[0]}`;
+      return `https://rfq-marketplace-502m.onrender.com/${rfq.images[0]}`;
     }
     return "";
   };

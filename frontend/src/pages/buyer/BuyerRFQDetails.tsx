@@ -83,7 +83,7 @@ const BuyerRFQDetails = () => {
 
 
       const rfqResponse = await fetch(
-        `http://localhost:3000/api/rfqs/${rfqId}`,
+        `https://rfq-marketplace-502m.onrender.com/api/rfqs/${rfqId}`,
         {
           method: "GET",
           headers: {
@@ -104,7 +104,7 @@ const BuyerRFQDetails = () => {
       setRfq(rfqData.rfq);
 
       const quoteResponse = await fetch(
-        `http://localhost:3000/api/rfqs/${rfqId}/quotes`,
+        `https://rfq-marketplace-502m.onrender.com/api/rfqs/${rfqId}/quotes`,
         {
           method: "GET",
           headers: {
@@ -372,7 +372,7 @@ const BuyerRFQDetails = () => {
                   {rfq.images.map((image, index) => (
                     <img
                       key={index}
-                      src={`http://localhost:3000${image}`}
+                      src={`https://rfq-marketplace-502m.onrender.com/${image}`}
                       alt={`RFQ reference ${index + 1}`}
                       className="w-24 h-24 object-cover rounded-xl border border-slate-700 bg-slate-900"
                     />

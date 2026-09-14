@@ -50,7 +50,7 @@ const BuyerDashboard = () => {
       }
 
       const response = await fetch(
-        "http://localhost:3000/api/rfqs/my",
+        "https://rfq-marketplace-502m.onrender.com/api/rfqs/my",
         {
           method: "GET",
           headers: {
@@ -75,7 +75,7 @@ const BuyerDashboard = () => {
       for (const rfq of data.rfqs || []) {
         try {
           const quoteResponse = await fetch(
-            `http://localhost:3000/api/rfqs/${rfq._id}/quotes`,
+            `https://rfq-marketplace-502m.onrender.com/api/rfqs/${rfq._id}/quotes`,
             {
               method: "GET",
               headers: {
@@ -206,7 +206,7 @@ const BuyerDashboard = () => {
       return image;
     }
 
-    return `http://localhost:3000${image}`;
+    return `https://rfq-marketplace-502m.onrender.com/${image}`;
   };
 
   return (

@@ -63,7 +63,7 @@ const SupplierRFQDetails = () => {
       }
 
       const response = await fetch(
-        `http://localhost:3000/api/supplier/rfqs/${id}`,
+        `https://rfq-marketplace-502m.onrender.com/api/supplier/rfqs/${id}`,
         {
           headers: {
             Authorization: `Bearer ${token}`,
@@ -108,7 +108,7 @@ const SupplierRFQDetails = () => {
       const token = localStorage.getItem("token");
 
       const response = await fetch(
-        `http://localhost:3000/api/supplier/rfqs/${id}/quotes`,
+        `https://rfq-marketplace-502m.onrender.com/api/supplier/rfqs/${id}/quotes`,
         {
           method: "POST",
           headers: {

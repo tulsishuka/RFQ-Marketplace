@@ -88,7 +88,7 @@ const SupplierDashboard = () => {
 
     
       const rfqResponse = await fetch(
-        "http://localhost:3000/api/supplier/rfqs",
+        "https://rfq-marketplace-502m.onrender.com/api/supplier/rfqs",
         {
           method: "GET",
           headers: {
@@ -107,7 +107,7 @@ const SupplierDashboard = () => {
       setRfqs(rfqData.rfqs || []);
 
       const quoteResponse = await fetch(
-        "http://localhost:3000/api/supplier/quotes/my",
+        "https://rfq-marketplace-502m.onrender.com/api/supplier/quotes/my",
         {
           method: "GET",
           headers: {
@@ -166,7 +166,7 @@ const SupplierDashboard = () => {
   
   const getRFQImage = (rfq: RFQ) => {
     if (rfq.images && rfq.images.length > 0) {
-      return `http://localhost:3000${rfq.images[0]}`;
+      return `https://rfq-marketplace-502m.onrender.com/${rfq.images[0]}`;
     }
     return "";
   };

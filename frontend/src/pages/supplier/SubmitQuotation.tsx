@@ -35,7 +35,7 @@ const SubmitQuotation = () => {
       }
 
       const response = await fetch(
-        `http://localhost:3000/api/supplier/rfqs/${id}/quotes`,
+        `https://rfq-marketplace-502m.onrender.com/api/supplier/rfqs/${id}/quotes`,
         {
           method: "POST",
           headers: {
