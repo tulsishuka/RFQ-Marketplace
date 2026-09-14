@@ -1,3 +1,5 @@
+
+
 import type { ReactNode } from "react";
 import Sidebar from "./Sidebar";
 
@@ -8,18 +10,13 @@ interface DashboardLayoutProps {
   children: ReactNode;
 }
 
-const DashboardLayout = ({
-  role,
-  children,
-}: DashboardLayoutProps) => {
+const DashboardLayout = ({ role, children }: DashboardLayoutProps) => {
   return (
-    <div className="min-h-screen bg-slate-50 flex">
+    <div className="min-h-screen w-full flex flex-row bg-[#070b14]">
 
-      {/* Sidebar changes according to role */}
       <Sidebar role={role} />
 
-      {/* Current dashboard page */}
-      <main className="flex-1 p-6 overflow-auto">
+      <main className="flex-1 min-w-0 w-full overflow-x-hidden">
         {children}
       </main>
 

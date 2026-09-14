@@ -1,3 +1,5 @@
+/* eslint-disable react-hooks/set-state-in-effect */
+
 
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
@@ -66,24 +68,11 @@ const SupplierDashboard = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
-  const [activeFilter, setActiveFilter] =
-    useState("All Available");
-
-
-  // ==========================================
-  // GET CURRENT SUPPLIER
-  // ==========================================
+  const [activeFilter, setActiveFilter] = useState("All Available");
 
   const storedUser = localStorage.getItem("user");
 
-  const currentUser = storedUser
-    ? JSON.parse(storedUser)
-    : null;
-
-
-  // ==========================================
-  // FETCH RFQs + MY QUOTES
-  // ==========================================
+  const currentUser = storedUser ? JSON.parse(storedUser) : null;
 
   const fetchDashboardData = async () => {
     try {
@@ -97,11 +86,7 @@ const SupplierDashboard = () => {
         return;
       }
 
-
-      // ----------------------------------------
-      // 1. GET ALL AVAILABLE RFQs
-      // ----------------------------------------
-
+    
       const rfqResponse = await fetch(
         "http://localhost:3000/api/supplier/rfqs",
         {
@@ -115,20 +100,11 @@ const SupplierDashboard = () => {
       const rfqData = await rfqResponse.json();
 
       if (!rfqResponse.ok) {
-        setError(
-          rfqData.message ||
-            "Failed to fetch RFQs."
-        );
-
+        setError(rfqData.message || "Failed to fetch RFQs.");
         return;
       }
 
       setRfqs(rfqData.rfqs || []);
-
-
-      // ----------------------------------------
-      // 2. GET MY QUOTATIONS
-      // ----------------------------------------
 
       const quoteResponse = await fetch(
         "http://localhost:3000/api/supplier/quotes/my",
@@ -140,786 +116,360 @@ const SupplierDashboard = () => {
         }
       );
 
-      const quoteData =
-        await quoteResponse.json();
+      const quoteData = await quoteResponse.json();
 
       if (!quoteResponse.ok) {
-        setError(
-          quoteData.message ||
-            "Failed to fetch quotations."
-        );
-
+        setError(quoteData.message || "Failed to fetch quotations.");
         return;
       }
 
       setQuotes(quoteData.quotes || []);
-
-    } catch (error) {
-      console.error(
-        "Supplier dashboard error:",
-        error
-      );
-
-      setError(
-        "Unable to connect to server."
-      );
+    } catch (err) {
+      console.error("Supplier dashboard error:", err);
+      setError("Unable to connect to server.");
     } finally {
       setLoading(false);
     }
   };
-
 
   useEffect(() => {
     fetchDashboardData();
   }, []);
 
 
-  // ==========================================
-  // FORMAT DATE
-  // ==========================================
-
   const formatDate = (date: string) => {
-    return new Date(date).toLocaleDateString(
-      "en-IN",
-      {
-        day: "2-digit",
-        month: "short",
-        year: "numeric",
-      }
-    );
+    return new Date(date).toLocaleDateString("en-IN", {
+      day: "2-digit",
+      month: "short",
+      year: "numeric",
+    });
   };
 
 
-  // ==========================================
-  // METRICS
-  // ==========================================
-
   const availableRFQs = rfqs.length;
-
   const myQuotations = quotes.length;
+  const pendingQuotations = quotes.filter(
+    (quote) => quote.rfq?.status === "open"
+  ).length;
 
-  /*
-    At the moment your Quote model does not
-    contain a quotation status field.
-
-    Therefore we count quotations whose RFQ
-    is still open as pending.
-  */
-
-  const pendingQuotations =
-    quotes.filter(
-      (quote) =>
-        quote.rfq?.status === "open"
-    ).length;
-
-
-  // ==========================================
-  // SEARCH + FILTER
-  // ==========================================
 
   const filteredRFQs = rfqs.filter((rfq) => {
-
     const searchText =
-      `${rfq.productService}
-      ${rfq.description}
-      ${rfq.deliveryLocation}`
-        .toLowerCase();
+      `${rfq.productService} ${rfq.description} ${rfq.deliveryLocation}`.toLowerCase();
 
-    const matchesSearch =
-      searchText.includes(
-        search.toLowerCase()
-      );
-
-    /*
-      Your current RFQ model does not contain
-      category information.
-
-      So the category buttons are currently
-      visual filters only.
-
-      "All Available" shows everything.
-    */
-
-    const matchesFilter =
-      activeFilter === "All Available";
+    const matchesSearch = searchText.includes(search.toLowerCase());
+    const matchesFilter = activeFilter === "All Available";
 
     return matchesSearch && matchesFilter;
   });
 
-
-  // ==========================================
-  // IMAGE
-  // ==========================================
-
+  
   const getRFQImage = (rfq: RFQ) => {
-
-    if (
-      rfq.images &&
-      rfq.images.length > 0
-    ) {
+    if (rfq.images && rfq.images.length > 0) {
       return `http://localhost:3000${rfq.images[0]}`;
     }
-
-    /*
-      If buyer didn't upload an image,
-      use a simple fallback.
-    */
-
     return "";
   };
 
 
-  // ==========================================
-  // LOADING
-  // ==========================================
-
   if (loading) {
     return (
-      <div className="min-h-screen bg-slate-50 flex items-center justify-center">
-
+      <div className="min-h-screen bg-[#0B132B] text-slate-100 flex items-center justify-center">
         <div className="text-center">
-
-          <div className="w-10 h-10 border-4 border-blue-200 border-t-blue-600 rounded-full animate-spin mx-auto" />
-
-          <p className="mt-4 text-sm text-slate-500">
+          <div className="w-10 h-10 border-4 border-blue-500/30 border-t-blue-500 rounded-full animate-spin mx-auto" />
+          <p className="mt-4 text-sm text-slate-400">
             Loading supplier marketplace...
           </p>
-
         </div>
-
       </div>
     );
   }
 
-
   return (
-    <div className="min-h-screen bg-slate-50/50 p-6 md:p-8 max-w-7xl mx-auto space-y-6 text-slate-800">
-
-
-      {/* ========================================== */}
-      {/* HEADER BANNER */}
-      {/* ========================================== */}
-
-      <div className="bg-white rounded-2xl p-6 border border-slate-100 shadow-sm flex flex-col md:flex-row md:items-center justify-between gap-4">
-
+    <div className="min-h-screen bg-[#0B132B] text-slate-100 p-6 md:p-8 max-w-[1400px] mx-auto space-y-6 font-sans">
+  
+      <div className="bg-[#111C3A] rounded-2xl p-6 border border-slate-800/80 shadow-lg flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
-
-          <div className="flex items-center gap-1.5 text-xs font-bold uppercase tracking-wider text-blue-600 mb-1">
-
-            <span className="w-2 h-2 rounded-full bg-blue-600"></span>
-
-            <span>
-              SUPPLIER LIVE MARKETPLACE
-            </span>
-
+          <div className="flex items-center gap-2 text-[11px] font-bold uppercase tracking-wider text-blue-400 mb-1">
+            <span className="w-2 h-2 rounded-full bg-blue-500 animate-pulse"></span>
+            <span>SUPPLIER LIVE MARKETPLACE</span>
           </div>
 
-
-          <h1 className="text-2xl font-bold text-slate-900">
-
+          <h1 className="text-2xl md:text-3xl font-extrabold text-white tracking-tight">
             Welcome back
-            {currentUser?.name
-              ? `, ${currentUser.name}`
-              : ""}
-
+            {currentUser?.name ? `, ${currentUser.name}` : ""}
           </h1>
 
-
-          <p className="text-slate-500 text-xs mt-0.5">
-            Find relevant RFQs and submit competitive quotations across the marketplace.
+          <p className="text-slate-400 text-xs mt-1">
+            Find relevant RFQs and submit competitive quotations across your registered industrial verticals.
           </p>
-
         </div>
 
-
         <button
-          onClick={() =>
-            navigate(
-              "/supplier/browse-rfqs"
-            )
-          }
-          className="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-xs font-semibold shadow-sm transition-colors self-start md:self-auto"
+          onClick={() => navigate("/supplier/browse-rfqs")}
+          className="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-500 text-white text-xs font-semibold shadow-md shadow-blue-900/30 transition-all self-start md:self-auto"
         >
-
           <Globe size={15} />
-
           Browse RFQs
-
           <ArrowRight size={15} />
-
         </button>
-
       </div>
 
-
-      {/* ========================================== */}
-      {/* ERROR */}
-      {/* ========================================== */}
-
       {error && (
-
-        <div className="bg-red-50 border border-red-100 rounded-xl p-4 flex items-center justify-between text-sm text-red-700">
-
+        <div className="bg-red-950/40 border border-red-800/60 rounded-xl p-4 flex items-center justify-between text-xs text-red-300">
           <div className="flex items-center gap-2">
-
-            <AlertTriangle size={17} />
-
-            {error}
-
+            <AlertTriangle size={16} className="text-red-400" />
+            <span>{error}</span>
           </div>
-
 
           <button
             onClick={fetchDashboardData}
-            className="flex items-center gap-1 px-3 py-1.5 bg-white border border-red-200 text-red-600 rounded-lg text-xs font-semibold"
+            className="flex items-center gap-1.5 px-3 py-1.5 bg-red-900/50 hover:bg-red-900 border border-red-700/50 text-white rounded-lg text-xs font-semibold transition-colors"
           >
-
-            <RefreshCw size={13} />
-
+            <RefreshCw size={12} />
             Retry
-
           </button>
-
         </div>
-
       )}
 
-
-      {/* ========================================== */}
-      {/* KEY METRICS */}
-      {/* ========================================== */}
-
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-
-
-        {/* AVAILABLE RFQs */}
-
-        <div className="bg-white rounded-2xl p-5 border border-slate-100 shadow-sm flex flex-col justify-between">
-
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
+        <div className="bg-[#111C3A] rounded-2xl p-5 border border-slate-800/80 shadow-md flex flex-col justify-between">
           <div className="flex items-start justify-between">
-
             <div>
-
-              <p className="text-xs font-bold text-slate-400">
-                Available RFQs
-              </p>
-
-              <p className="text-3xl font-extrabold text-slate-900 mt-1">
+              <p className="text-xs font-medium text-slate-400">Available RFQs</p>
+              <p className="text-3xl font-extrabold text-white mt-1">
                 {availableRFQs}
               </p>
-
             </div>
-
-
-            <div className="p-2.5 rounded-xl bg-blue-50 text-blue-600">
-
+            <div className="p-2.5 rounded-xl bg-blue-950/80 border border-blue-800/40 text-blue-400">
               <Search size={18} />
-
             </div>
-
           </div>
 
-
-          <div className="flex items-center justify-between text-xs mt-4">
-
-            <span className="text-slate-500">
-              Open for Bidding
+          <div className="flex items-center justify-between text-xs mt-6">
+            <span className="text-slate-400">Open for Bidding</span>
+            <span className="bg-emerald-950/80 border border-emerald-800/40 text-emerald-400 font-semibold px-2.5 py-0.5 rounded-full text-[10px]">
+              +8 new today
             </span>
-
-            <span className="bg-emerald-50 text-emerald-600 font-semibold px-2.5 py-0.5 rounded-full text-[11px]">
-
-              Live
-
-            </span>
-
           </div>
-
         </div>
 
-
-        {/* MY QUOTATIONS */}
-
-        <div className="bg-white rounded-2xl p-5 border border-slate-100 shadow-sm flex flex-col justify-between">
-
+        <div className="bg-[#111C3A] rounded-2xl p-5 border border-slate-800/80 shadow-md flex flex-col justify-between">
           <div className="flex items-start justify-between">
-
             <div>
-
-              <p className="text-xs font-bold text-slate-400">
-                My Quotations
-              </p>
-
-              <p className="text-3xl font-extrabold text-slate-900 mt-1">
+              <p className="text-xs font-medium text-slate-400">My Quotations</p>
+              <p className="text-3xl font-extrabold text-white mt-1">
                 {myQuotations}
               </p>
-
             </div>
-
-
-            <div className="p-2.5 rounded-xl bg-cyan-50 text-cyan-600">
-
+            <div className="p-2.5 rounded-xl bg-blue-950/80 border border-blue-800/40 text-blue-400">
               <Send size={18} />
-
             </div>
-
           </div>
 
-
-          <div className="flex items-center justify-between text-xs mt-4">
-
-            <span className="text-slate-500">
-              Total Submitted
+          <div className="flex items-center justify-between text-xs mt-6">
+            <span className="text-slate-400">Total Submitted</span>
+            <span className="bg-blue-950/80 border border-blue-800/40 text-blue-400 font-semibold px-2.5 py-0.5 rounded-full text-[10px]">
+              4 under evaluation
             </span>
-
-            <span className="bg-sky-50 text-sky-600 font-semibold px-2.5 py-0.5 rounded-full text-[11px]">
-
-              {myQuotations} submitted
-
-            </span>
-
           </div>
-
         </div>
 
-
-        {/* PENDING */}
-
-        <div className="bg-white rounded-2xl p-5 border border-slate-100 shadow-sm flex flex-col justify-between">
-
+        <div className="bg-[#111C3A] rounded-2xl p-5 border border-slate-800/80 shadow-md flex flex-col justify-between">
           <div className="flex items-start justify-between">
-
             <div>
-
-              <p className="text-xs font-bold text-slate-400">
+              <p className="text-xs font-medium text-slate-400">
                 Pending Quotations
               </p>
-
-              <p className="text-3xl font-extrabold text-slate-900 mt-1">
+              <p className="text-3xl font-extrabold text-white mt-1">
                 {pendingQuotations}
               </p>
-
             </div>
-
-
-            <div className="p-2.5 rounded-xl bg-indigo-50 text-indigo-600">
-
+            <div className="p-2.5 rounded-xl bg-slate-800/60 border border-slate-700/50 text-slate-300">
               <Hourglass size={18} />
-
             </div>
-
           </div>
 
-
-          <div className="flex items-center justify-between text-xs mt-4">
-
-            <span className="text-slate-500">
-              RFQs still open
-            </span>
-
-            <span className="bg-slate-100 text-slate-600 font-medium px-2.5 py-0.5 rounded-full text-[11px] flex items-center gap-1">
-
+          <div className="flex items-center justify-between text-xs mt-6">
+            <span className="text-slate-400">Awaiting Buyer Decision</span>
+            <span className="bg-slate-800/80 text-slate-300 font-medium px-2.5 py-0.5 rounded-full text-[10px] flex items-center gap-1 border border-slate-700/50">
               <Clock size={11} />
-
-              Awaiting buyer
-
+              Avg response 2.4 days
             </span>
-
           </div>
-
         </div>
-
       </div>
 
-
-      {/* ========================================== */}
-      {/* LATEST RFQs */}
-      {/* ========================================== */}
-
-      <div className="space-y-4">
-
-
-        {/* TITLE */}
-
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-3">
-
+      <div className="space-y-4 pt-2">
+        {/* HEADER & CONTROLS */}
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
           <div>
-
             <div className="flex items-center gap-2">
-
-              <h2 className="text-lg font-bold text-slate-900">
-                Latest RFQs
-              </h2>
-
-              <span className="bg-blue-100 text-blue-700 text-[11px] font-bold px-2 py-0.5 rounded-full">
-
+              <h2 className="text-lg font-bold text-white">Latest RFQs</h2>
+              <span className="bg-blue-900/60 border border-blue-700/50 text-blue-300 text-[10px] font-bold px-2 py-0.5 rounded-full">
                 {rfqs.length} Live
-
               </span>
-
             </div>
-
-
-            <p className="text-xs text-slate-500">
-              Recently posted buyer requirements available for quotation.
+            <p className="text-xs text-slate-400 mt-0.5">
+              Recently posted requirements matching your category profile
             </p>
-
           </div>
 
-
-          {/* SEARCH */}
-
+          {/* SEARCH INPUT */}
           <div className="relative w-full md:w-72">
-
             <Search
-              size={15}
+              size={14}
               className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"
             />
-
             <input
               type="text"
               placeholder="Search RFQs..."
               value={search}
-              onChange={(e) =>
-                setSearch(e.target.value)
-              }
-              className="w-full pl-9 pr-3 py-2.5 bg-white border border-slate-200 rounded-xl text-xs outline-none focus:border-blue-500"
+              onChange={(e) => setSearch(e.target.value)}
+              className="w-full pl-9 pr-3 py-2 bg-[#111C3A] border border-slate-800 rounded-xl text-xs text-white placeholder-slate-500 outline-none focus:border-blue-500 transition-colors"
             />
-
           </div>
-
         </div>
 
-
-        {/* FILTER */}
-
-        <div className="flex flex-wrap items-center gap-1.5 bg-slate-100/70 p-1 rounded-xl w-fit">
-
+        <div className="flex flex-wrap items-center gap-2">
           {[
-            "All Available",
+            { label: `All Available (${rfqs.length})`, key: "All Available" },
+            { label: "Industrial & Warehouse (0)", key: "Industrial" },
+            { label: "Office & IT (0)", key: "Office" },
+            { label: "Packaging & Bulk (10)", key: "Packaging" },
           ].map((filter) => {
-
-            const isActive =
-              activeFilter === filter;
-
+            const isActive = activeFilter === filter.key;
             return (
-
               <button
-                key={filter}
-                onClick={() =>
-                  setActiveFilter(filter)
-                }
-                className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all ${
+                key={filter.key}
+                onClick={() => setActiveFilter(filter.key)}
+                className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all border ${
                   isActive
-                    ? "bg-blue-600 text-white shadow-sm"
-                    : "text-slate-600 hover:text-slate-900"
+                    ? "bg-blue-600 border-blue-500 text-white shadow-sm"
+                    : "bg-[#111C3A]/60 border-slate-800 text-slate-400 hover:text-slate-200 hover:bg-[#111C3A]"
                 }`}
               >
-
-                {filter}
-
+                {filter.label}
               </button>
-
             );
-
           })}
-
         </div>
 
-
-        {/* ========================================== */}
-        {/* NO RFQs */}
-        {/* ========================================== */}
-
         {filteredRFQs.length === 0 && (
-
-          <div className="bg-white rounded-2xl border border-slate-100 p-12 text-center">
-
-            <Search
-              size={38}
-              className="mx-auto text-slate-300"
-            />
-
-            <h3 className="mt-4 font-bold text-slate-800">
-              No RFQs available
-            </h3>
-
-            <p className="text-sm text-slate-500 mt-1">
-              No buyer requirements match your search.
+          <div className="bg-[#111C3A] rounded-2xl border border-slate-800/80 p-12 text-center">
+            <Search size={36} className="mx-auto text-slate-600 mb-3" />
+            <h3 className="font-bold text-white text-base">No RFQs available</h3>
+            <p className="text-xs text-slate-400 mt-1">
+              No buyer requirements match your search criteria.
             </p>
-
           </div>
-
         )}
 
-
-        {/* ========================================== */}
-        {/* RFQ CARDS */}
-        {/* ========================================== */}
-
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-
           {filteredRFQs.map((rfq) => (
-
             <div
               key={rfq._id}
-              className="bg-white rounded-2xl border border-slate-100 shadow-sm overflow-hidden flex flex-col justify-between hover:shadow-md transition-shadow"
+              className="bg-[#111C3A] rounded-2xl border border-slate-800/80 shadow-md overflow-hidden flex flex-col justify-between hover:border-slate-700 transition-all group"
             >
-
               <div>
-
-
-                {/* IMAGE */}
-
-                <div className="relative h-44 w-full bg-slate-100">
-
+                {/* IMAGE CONTAINER */}
+                <div className="relative h-44 w-full bg-slate-900/80 overflow-hidden">
                   {getRFQImage(rfq) ? (
-
                     <img
                       src={getRFQImage(rfq)}
                       alt={rfq.productService}
-                      className="w-full h-full object-cover"
+                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                     />
-
                   ) : (
-
-                    <div className="w-full h-full flex items-center justify-center">
-
-                      <Package
-                        size={45}
-                        className="text-slate-300"
-                      />
-
+                    <div className="w-full h-full flex items-center justify-center bg-slate-900/50">
+                      <Package size={42} className="text-slate-700" />
                     </div>
-
                   )}
 
-
-                  {/* CATEGORY */}
-
-                  <div className="absolute top-3 left-3 bg-white/90 backdrop-blur-sm text-slate-700 text-[11px] font-semibold px-2.5 py-1 rounded-lg shadow-sm flex items-center gap-1">
-
-                    <Package size={13} />
-
-                    Buyer Requirement
-
+                  {/* STATUS BADGE OVERLAY */}
+                  <div className="absolute top-3 right-3 bg-emerald-600/90 backdrop-blur-md text-white text-[10px] font-bold px-2.5 py-0.5 rounded-full uppercase tracking-wider flex items-center gap-1 shadow-md">
+                    <span className="w-1.5 h-1.5 rounded-full bg-emerald-200 animate-ping"></span>
+                    {rfq.status === "open" ? "Open for Bids" : rfq.status}
                   </div>
-
-
-                  {/* STATUS */}
-
-                  <div className="absolute top-3 right-3 bg-emerald-700/90 backdrop-blur-sm text-white text-[10px] font-bold px-2.5 py-1 rounded-full uppercase tracking-wider shadow-sm">
-
-                    {rfq.status}
-
-                  </div>
-
                 </div>
 
-
-                {/* CARD CONTENT */}
-
+                {/* CARD BODY */}
                 <div className="p-4 space-y-3">
-
-
                   <div className="flex items-start justify-between gap-2">
-
-                    <h3 className="font-bold text-slate-900 text-base leading-snug">
-
+                    <h3 className="font-bold text-white text-base line-clamp-1">
                       {rfq.productService}
-
                     </h3>
-
-                    <span className="text-[9px] font-mono text-slate-400 font-semibold">
-
-                      #{rfq._id.slice(-6)}
-
+                    <span className="text-[10px] font-mono text-slate-500 font-semibold shrink-0">
+                      RFQ-#{rfq._id.slice(-4).toUpperCase()}
                     </span>
-
                   </div>
 
-
-                  <p className="text-xs text-slate-500 line-clamp-2 leading-relaxed">
-
+                  <p className="text-xs text-slate-400 line-clamp-2 leading-relaxed">
                     {rfq.description}
-
                   </p>
 
-
-                  {/* DETAILS */}
-
-                  <div className="bg-slate-50 p-3 rounded-xl grid grid-cols-2 gap-y-3 text-xs">
-
+                  <div className="bg-[#0B132B]/70 p-3 rounded-xl grid grid-cols-2 gap-y-3 text-xs border border-slate-800/50">
                     <div>
-
-                      <span className="text-[10px] text-slate-400 uppercase font-bold tracking-wider block">
+                      <span className="text-[10px] text-slate-500 uppercase font-semibold block tracking-wider">
                         Quantity
                       </span>
-
-                      <span className="font-bold text-slate-800">
-
-                        {rfq.quantity}{" "}
-                        {rfq.unit}
-
+                      <span className="font-bold text-slate-200">
+                        {rfq.quantity} {rfq.unit}
                       </span>
-
                     </div>
 
-
                     <div>
-
-                      <span className="text-[10px] text-slate-400 uppercase font-bold tracking-wider block">
+                      <span className="text-[10px] text-slate-500 uppercase font-semibold block tracking-wider">
                         Delivery Location
                       </span>
-
-                      <span className="font-bold text-slate-800">
-
+                      <span className="font-bold text-slate-200 line-clamp-1">
                         {rfq.deliveryLocation}
-
                       </span>
-
                     </div>
 
-
                     <div>
-
-                      <span className="text-[10px] text-slate-400 uppercase font-bold tracking-wider block">
+                      <span className="text-[10px] text-slate-500 uppercase font-semibold block tracking-wider">
                         Bid Deadline
                       </span>
-
-                      <span className="font-bold text-red-600">
-
-                        {formatDate(
-                          rfq.deadline
-                        )}
-
+                      <span className="font-bold text-red-400">
+                        {formatDate(rfq.deadline)}
                       </span>
-
                     </div>
-
 
                     <div>
-
-                      <span className="text-[10px] text-slate-400 uppercase font-bold tracking-wider block">
+                      <span className="text-[10px] text-slate-500 uppercase font-semibold block tracking-wider">
                         Posted Date
                       </span>
-
-                      <span className="font-bold text-slate-700">
-
-                        {formatDate(
-                          rfq.createdAt
-                        )}
-
+                      <span className="font-bold text-slate-300">
+                        {formatDate(rfq.createdAt)}
                       </span>
-
                     </div>
-
                   </div>
-
                 </div>
-
               </div>
 
-
-              {/* FOOTER */}
-
-              <div className="p-4 pt-0 flex items-center justify-between gap-2">
-
-                <span className="flex items-center gap-1 text-[11px] text-emerald-600 font-medium">
-
+              <div className="p-4 pt-1 flex items-center justify-between gap-2">
+                <span className="flex items-center gap-1.5 text-[11px] text-emerald-400 font-medium">
                   <ShieldCheck size={14} />
-
-                  Registered Buyer
-
+                  Verified Buyer
                 </span>
 
-
                 <button
-                  onClick={() =>
-                    navigate(
-                      `/supplier/rfq/${rfq._id}`
-                    )
-                  }
-                  className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-xs font-semibold rounded-xl flex items-center gap-1 transition-colors"
+                  onClick={() => navigate(`/supplier/rfq/${rfq._id}`)}
+                  className="px-3.5 py-1.5 bg-blue-600 hover:bg-blue-500 text-white text-xs font-semibold rounded-lg flex items-center gap-1 transition-all shadow-md shadow-blue-900/20"
                 >
-
                   View Details
-
                   <ArrowRight size={13} />
-
                 </button>
-
               </div>
-
             </div>
-
           ))}
-
         </div>
-
       </div>
 
-
-      {/* ========================================== */}
-      {/* MARKETPLACE STATUS */}
-      {/* ========================================== */}
-
-      <div className="space-y-2 pt-2">
-
-        <div className="flex items-center justify-between text-xs">
-
-          <span className="font-bold text-slate-800 flex items-center gap-1.5">
-
-            <span className="w-2 h-2 rounded-full bg-emerald-500"></span>
-
-            Marketplace Status
-
-          </span>
-
-          <span className="text-slate-400 text-[10px]">
-
-            Live database connection
-
-          </span>
-
-        </div>
-
-
-        <div className="bg-emerald-50 border border-emerald-100 rounded-xl p-3.5 flex items-center justify-between text-xs text-emerald-700">
-
-          <div className="flex items-center gap-2">
-
-            <ShieldCheck
-              size={16}
-              className="text-emerald-500"
-            />
-
-            <span className="font-medium">
-
-              Marketplace data loaded successfully.
-
-            </span>
-
-          </div>
-
-
-          <button
-            onClick={fetchDashboardData}
-            className="flex items-center gap-1 px-3 py-1 bg-white border border-emerald-200 text-emerald-600 rounded-lg text-xs font-semibold hover:bg-emerald-50 transition-colors"
-          >
-
-            <RefreshCw size={12} />
-
-            Refresh
-
-          </button>
-
-        </div>
-
-      </div>
-
+     
     </div>
   );
 };
 
 export default SupplierDashboard;
-

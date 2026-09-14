@@ -5,7 +5,6 @@ import Footer from "./components/layout/Footer";
 
 import Home from "./pages/Home";
 import About from "./pages/About";
-import Third from "./pages/Third";
 import Login from "./pages/Login";
 import Signup from "./pages/Signup";
 
@@ -17,8 +16,8 @@ import SupplierDashboardLayout from "./pages/supplier/SuppierDashboardLayout";
 import SupplierDashboard from "./pages/supplier/SupplierDashboard";
 import BrowseRFQs from "./pages/supplier/BrowseRFQs";
 import SupplierRFQDetails from "./pages/supplier/SupplierRFQDetails";
-import MyQuotations from "./pages/supplier/MyQuotations";
 import SubmitQuotation from "./pages/supplier/SubmitQuotation";
+import ProcurementPage from "./pages/ProcurementPage";
 
 const MainPage = () => {
   return (
@@ -27,8 +26,7 @@ const MainPage = () => {
 
       <Home />
       <About />
-      <Third />
-
+      <ProcurementPage/>
       <Footer />
     </>
   );

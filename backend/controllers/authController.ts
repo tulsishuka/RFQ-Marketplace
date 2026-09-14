@@ -80,10 +80,6 @@ export const register = async (
 };
 
 
-// ==========================
-// LOGIN
-// ==========================
-
 export const login = async (
   req: Request,
   res: Response
@@ -95,7 +91,6 @@ export const login = async (
       role,
     } = req.body;
 
-    // Check required fields
     if (!email || !password || !role) {
       res.status(400).json({
         message: "Email, password and role are required",
@@ -104,7 +99,6 @@ export const login = async (
       return;
     }
 
-    // Check valid role
     if (role !== "buyer" && role !== "supplier") {
       res.status(400).json({
         message: "Role must be buyer or supplier",
@@ -113,7 +107,6 @@ export const login = async (
       return;
     }
 
-    // Find user
     const user = await User.findOne({ email });
 
     if (!user) {
@@ -124,7 +117,6 @@ export const login = async (
       return;
     }
 
-    // Check password
     const isPasswordCorrect = await bcrypt.compare(
       password,
       user.password
@@ -138,7 +130,6 @@ export const login = async (
       return;
     }
 
-    // Check role
     if (user.role !== role) {
       res.status(403).json({
         message: `This account is registered as ${user.role}`,
@@ -147,13 +138,11 @@ export const login = async (
       return;
     }
 
-    // Generate JWT
     const token = generateToken({
       id: user._id.toString(),
       role: user.role,
     });
 
-    // Send response
     res.status(200).json({
       message: "Login successful",
 

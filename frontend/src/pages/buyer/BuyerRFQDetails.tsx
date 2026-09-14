@@ -1,17 +1,18 @@
+/* eslint-disable react-hooks/set-state-in-effect */
+
+
 
 import { useEffect, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 
 import {
   ArrowLeft,
-  Pencil,
-  Trash2,
+
   MapPin,
   ClipboardList,
   CheckCircle2,
   ShieldCheck,
   TrendingUp,
-  Star,
   Check,
   MessageSquare,
   Zap,
@@ -19,6 +20,7 @@ import {
   Wrench,
   Clock,
   Truck,
+  Sparkles,
 } from "lucide-react";
 
 interface RFQ {
@@ -54,8 +56,6 @@ const BuyerRFQDetails = () => {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
 
-  // Get the RFQ id from:
-  // /buyer/buyerdetail?id=123
   const rfqId = searchParams.get("id");
 
   const [rfq, setRfq] = useState<RFQ | null>(null);
@@ -81,9 +81,6 @@ const BuyerRFQDetails = () => {
         return;
       }
 
-      // --------------------------------
-      // 1. Fetch selected RFQ
-      // --------------------------------
 
       const rfqResponse = await fetch(
         `http://localhost:3000/api/rfqs/${rfqId}`,
@@ -105,10 +102,6 @@ const BuyerRFQDetails = () => {
       }
 
       setRfq(rfqData.rfq);
-
-      // --------------------------------
-      // 2. Fetch quotations for this RFQ
-      // --------------------------------
 
       const quoteResponse = await fetch(
         `http://localhost:3000/api/rfqs/${rfqId}/quotes`,
@@ -144,19 +137,17 @@ const BuyerRFQDetails = () => {
 
   useEffect(() => {
     fetchRFQDetails();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [rfqId]);
 
-  // --------------------------------
-  // Loading
-  // --------------------------------
-
+ 
   if (loading) {
     return (
-      <div className="min-h-screen bg-slate-50 flex items-center justify-center">
+      <div className="min-h-screen bg-[#060a12] flex items-center justify-center">
         <div className="text-center">
-          <div className="w-10 h-10 border-4 border-blue-200 border-t-blue-600 rounded-full animate-spin mx-auto" />
+          <div className="w-10 h-10 border-4 border-blue-500/20 border-t-blue-500 rounded-full animate-spin mx-auto" />
 
-          <p className="mt-4 text-sm text-slate-500">
+          <p className="mt-4 text-sm text-slate-400">
             Loading RFQ details...
           </p>
         </div>
@@ -164,21 +155,17 @@ const BuyerRFQDetails = () => {
     );
   }
 
-  // --------------------------------
-  // Error
-  // --------------------------------
-
   if (error || !rfq) {
     return (
-      <div className="min-h-screen bg-slate-50 flex items-center justify-center p-6">
-        <div className="bg-white rounded-2xl border border-slate-200 p-8 text-center max-w-md">
-          <p className="text-red-600 font-semibold">
+      <div className="min-h-screen bg-[#060a12] flex items-center justify-center p-6">
+        <div className="bg-[#0b1329] rounded-2xl border border-slate-800 p-8 text-center max-w-md shadow-2xl">
+          <p className="text-red-400 font-semibold">
             {error || "RFQ not found."}
           </p>
 
           <button
             onClick={() => navigate("/buyer/dashboard")}
-            className="mt-5 px-4 py-2 bg-blue-700 text-white rounded-lg text-sm"
+            className="mt-5 px-5 py-2.5 bg-blue-600 hover:bg-blue-500 text-white rounded-xl text-xs font-semibold transition-all shadow-lg shadow-blue-600/20"
           >
             Back to Dashboard
           </button>
@@ -187,10 +174,7 @@ const BuyerRFQDetails = () => {
     );
   }
 
-  // --------------------------------
-  // Calculations
-  // --------------------------------
-
+ 
   const lowestQuote =
     quotes.length > 0
       ? [...quotes].sort(
@@ -227,760 +211,503 @@ const BuyerRFQDetails = () => {
   };
 
   return (
-    <div className="min-h-screen bg-slate-50/50 p-6 md:p-8 max-w-7xl mx-auto space-y-6 text-slate-800">
+    <div className="min-h-screen bg-[#060a12] text-slate-100 font-sans p-4 md:p-8">
+      <div className="max-w-7xl mx-auto space-y-6">
 
-      {/* ========================================= */}
-      {/* HEADER */}
-      {/* ========================================= */}
+      
+        <div className="flex items-center justify-between border-b border-slate-800/80 pb-4">
+          <div className="flex items-center gap-2 text-xs font-medium text-slate-400">
+            <span className="text-slate-200 font-semibold">Procurement Portal</span>
+            <span>/</span>
+            <span>Buyer Workspace</span>
+          </div>
 
-      <div className="space-y-3">
+         
+        </div>
 
-        <div className="flex items-center justify-between text-xs text-slate-500">
+        <div className="space-y-4">
+          <div className="flex items-center justify-between text-xs">
+            <button
+              onClick={() => navigate("/buyer/dashboard")}
+              className="flex items-center gap-2 font-medium text-blue-400 hover:text-blue-300 transition-colors"
+            >
+              <ArrowLeft size={15} />
+              Back to My RFQs
+            </button>
 
-          <button
-            onClick={() =>
-              navigate("/buyer/dashboard")
-            }
-            className="flex items-center gap-1.5 font-medium hover:text-slate-900 transition-colors"
-          >
-            <ArrowLeft size={14} />
-            Back to My RFQs
-          </button>
+            <div className="flex items-center gap-3">
+              <span className="font-mono text-xs text-slate-400 tracking-wide">
+                RFQ-ID: #{rfq._id.slice(-8).toUpperCase()}
+              </span>
+              <span className="flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-emerald-950/60 text-emerald-400 border border-emerald-800/60 text-[11px] font-medium">
+                <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+                Public Sourcing
+              </span>
+            </div>
+          </div>
 
-          <div className="flex items-center gap-3 font-mono">
+          <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 pt-1">
+            <div>
+              <div className="flex flex-wrap items-center gap-3">
+                <h1 className="text-2xl sm:text-3xl font-extrabold text-white tracking-tight">
+                  {rfq.productService}
+                </h1>
 
-            <span>
-              RFQ-ID: #{rfq._id.slice(-8).toUpperCase()}
-            </span>
+                <span
+                  className={`text-xs px-2.5 py-0.5 rounded-full font-semibold border ${
+                    rfq.status === "open"
+                      ? "bg-emerald-500/10 text-emerald-400 border-emerald-500/30"
+                      : "bg-slate-800 text-slate-400 border-slate-700"
+                  }`}
+                >
+                  {rfq.status === "open" ? "● Open" : "Closed"}
+                </span>
 
-            <span className="flex items-center gap-1 text-emerald-600 font-sans font-medium">
-              <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
+                <span className="text-xs px-2.5 py-0.5 rounded-full bg-slate-800/80 text-slate-300 border border-slate-700 font-medium">
+                  Standard Commercial Sourcing
+                </span>
+              </div>
 
-              {rfq.status === "open"
-                ? "Open RFQ"
-                : "Closed RFQ"}
-            </span>
+             
+            </div>
 
+             
+            
           </div>
         </div>
 
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
 
-          <div>
+         
+          <div className="lg:col-span-2 bg-[#0b1329] rounded-2xl p-5 sm:p-6 border border-slate-800/80 shadow-xl space-y-5">
 
-            <div className="flex flex-wrap items-center gap-3">
+            <div className="flex items-center justify-between border-b border-slate-800/80 pb-3.5">
+              <div className="flex items-center gap-2.5 font-bold text-white text-base">
+                <ClipboardList className="text-blue-400" size={18} />
+                <span>Buyer Requirement Details</span>
+              </div>
 
-              <h1 className="text-2xl font-bold text-slate-900">
-                {rfq.productService}
-              </h1>
-
-              <span
-                className={`text-xs px-2.5 py-0.5 rounded-full font-semibold ${
-                  rfq.status === "open"
-                    ? "bg-emerald-100 text-emerald-700"
-                    : "bg-slate-100 text-slate-600"
-                }`}
-              >
-                {rfq.status === "open"
-                  ? "Open"
-                  : "Closed"}
-              </span>
-
-            </div>
-
-            <p className="text-slate-500 text-xs mt-1">
-              RFQ created on{" "}
-              {formatDate(rfq.createdAt)}
-            </p>
-
-          </div>
-
-          <div className="flex items-center gap-3">
-
-            <button
-              onClick={() =>
-                navigate(
-                  `/buyer/buyerdetail?id=${rfq._id}&edit=true`
-                )
-              }
-              className="flex items-center gap-1.5 px-4 py-2 rounded-xl border border-slate-200 text-slate-700 text-xs font-semibold bg-white hover:bg-slate-50 transition-colors"
-            >
-              <Pencil size={14} />
-              Edit RFQ
-            </button>
-
-            <button
-              className="flex items-center gap-1.5 px-4 py-2 rounded-xl text-red-600 bg-red-50 hover:bg-red-100 text-xs font-semibold transition-colors"
-            >
-              <Trash2 size={14} />
-              Delete RFQ
-            </button>
-
-          </div>
-
-        </div>
-      </div>
-
-
-      {/* ========================================= */}
-      {/* TOP SUMMARY */}
-      {/* ========================================= */}
-
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-
-        {/* ----------------------------------------- */}
-        {/* RFQ DETAILS */}
-        {/* ----------------------------------------- */}
-
-        <div className="lg:col-span-2 bg-white rounded-2xl p-6 border border-slate-100 shadow-sm space-y-5">
-
-          <div className="flex items-center justify-between border-b border-slate-100 pb-4">
-
-            <div className="flex items-center gap-2 font-bold text-slate-900 text-base">
-              <ClipboardList
-                className="text-blue-600"
-                size={20}
-              />
-
-              <span>
-                Buyer Requirement Details
+              <span className="text-[11px] text-slate-400 bg-slate-800/50 border border-slate-700/50 px-2.5 py-0.5 rounded-md">
+                Category: Corporate Furniture
               </span>
             </div>
 
-            <span className="text-xs text-slate-400">
-              RFQ Requirement
-            </span>
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
 
-          </div>
+              <div className="bg-[#111c38] p-3 rounded-xl border border-slate-800/60">
+                <p className="text-[10px] font-bold uppercase tracking-wider text-slate-400">
+                  PRODUCT / SERVICE
+                </p>
+                <p className="font-bold text-slate-100 text-xs sm:text-sm mt-1">
+                  {rfq.productService}
+                </p>
+              </div>
 
+              <div className="bg-[#111c38] p-3 rounded-xl border border-slate-800/60">
+                <p className="text-[10px] font-bold uppercase tracking-wider text-slate-400">
+                  TOTAL QUANTITY
+                </p>
+                <p className="font-bold text-blue-400 text-xs sm:text-sm mt-1">
+                  {rfq.quantity} {rfq.unit}
+                </p>
+              </div>
 
-          {/* SPEC GRID */}
+              <div className="bg-[#111c38] p-3 rounded-xl border border-slate-800/60">
+                <p className="text-[10px] font-bold uppercase tracking-wider text-slate-400">
+                  DELIVERY LOCATION
+                </p>
+                <p className="font-bold text-slate-100 text-xs sm:text-sm mt-1 flex items-center gap-1">
+                  <MapPin size={12} className="text-blue-400 shrink-0" />
+                  <span className="truncate">{rfq.deliveryLocation}</span>
+                </p>
+              </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3">
+              <div className="bg-[#111c38] p-3 rounded-xl border border-slate-800/60">
+                <p className="text-[10px] font-bold uppercase tracking-wider text-slate-400">
+                  DEADLINE FOR QUOTES
+                </p>
+                <p className="font-bold text-red-400 text-xs sm:text-sm mt-1">
+                  {formatDate(rfq.deadline)}
+                </p>
+              </div>
 
-            <div className="bg-slate-50/80 p-3 rounded-xl">
+              <div className="bg-[#111c38] p-3 rounded-xl border border-slate-800/60">
+                <p className="text-[10px] font-bold uppercase tracking-wider text-slate-400">
+                  POSTED ON
+                </p>
+                <p className="font-bold text-slate-200 text-xs sm:text-sm mt-1">
+                  {formatDate(rfq.createdAt)}
+                </p>
+              </div>
+
+              <div className="bg-[#111c38] p-3 rounded-xl border border-slate-800/60">
+                <p className="text-[10px] font-bold uppercase tracking-wider text-slate-400">
+                  TARGET FULFILLMENT
+                </p>
+                <p className="font-bold text-slate-200 text-xs sm:text-sm mt-1">
+                  Immediate / Q3 Batch
+                </p>
+              </div>
+
+            </div>
+
+            {/* DESCRIPTION */}
+            <div className="space-y-1.5">
               <p className="text-[10px] font-bold uppercase tracking-wider text-slate-400">
-                PRODUCT / SERVICE
+                REQUIREMENT DESCRIPTION & SPECIFICATIONS
               </p>
 
-              <p className="font-bold text-slate-800 text-xs mt-1">
-                {rfq.productService}
-              </p>
+              <div className="bg-[#111c38]/70 border border-slate-800 p-4 rounded-xl text-xs text-slate-300 leading-relaxed">
+                {rfq.description}
+              </div>
             </div>
 
-
-            <div className="bg-blue-50/60 p-3 rounded-xl">
-
-              <p className="text-[10px] font-bold uppercase tracking-wider text-slate-400">
-                TOTAL QUANTITY
-              </p>
-
-              <p className="font-bold text-blue-700 text-xs mt-1">
-                {rfq.quantity} {rfq.unit}
-              </p>
-
-            </div>
-
-
-            <div className="bg-slate-50/80 p-3 rounded-xl">
-
-              <p className="text-[10px] font-bold uppercase tracking-wider text-slate-400">
-                DELIVERY LOCATION
-              </p>
-
-              <p className="font-bold text-slate-800 text-xs mt-1 flex items-center gap-1">
-
-                <MapPin
-                  size={12}
-                  className="text-slate-500"
-                />
-
-                {rfq.deliveryLocation}
-
-              </p>
-
-            </div>
-
-
-            <div className="bg-slate-50/80 p-3 rounded-xl">
-
-              <p className="text-[10px] font-bold uppercase tracking-wider text-slate-400">
-                DEADLINE FOR QUOTES
-              </p>
-
-              <p className="font-bold text-red-600 text-xs mt-1">
-                {formatDate(rfq.deadline)}
-              </p>
-
-            </div>
-
-
-            <div className="bg-slate-50/80 p-3 rounded-xl">
-
-              <p className="text-[10px] font-bold uppercase tracking-wider text-slate-400">
-                POSTED ON
-              </p>
-
-              <p className="font-bold text-slate-800 text-xs mt-1">
-                {formatDate(rfq.createdAt)}
-              </p>
-
-            </div>
-
-
-            <div className="bg-slate-50/80 p-3 rounded-xl">
-
-              <p className="text-[10px] font-bold uppercase tracking-wider text-slate-400">
-                STATUS
-              </p>
-
-              <p className="font-bold text-slate-800 text-xs mt-1 capitalize">
-                {rfq.status}
-              </p>
-
-            </div>
-
-          </div>
-
-
-          {/* DESCRIPTION */}
-
-          <div className="space-y-1.5">
-
-            <p className="text-[11px] font-bold uppercase tracking-wider text-slate-400">
-              REQUIREMENT DESCRIPTION & SPECIFICATIONS
-            </p>
-
-            <div className="bg-blue-50/30 border border-blue-100/60 p-4 rounded-xl text-xs text-slate-700 leading-relaxed">
-              {rfq.description}
-            </div>
-
-          </div>
-
-
-          {/* IMAGES */}
-
-          {rfq.images &&
-            rfq.images.length > 0 && (
-
+            {rfq.images && rfq.images.length > 0 && (
               <div className="space-y-2">
-
-                <p className="text-[11px] font-bold uppercase tracking-wider text-slate-400">
+                <p className="text-[10px] font-bold uppercase tracking-wider text-slate-400">
                   REFERENCE IMAGES
                 </p>
 
                 <div className="flex flex-wrap gap-3">
-
-                  {rfq.images.map(
-                    (image, index) => (
-
-                      <img
-                        key={index}
-                        src={`http://localhost:3000${image}`}
-                        alt={`RFQ reference ${index + 1}`}
-                        className="w-28 h-28 object-cover rounded-xl border border-slate-200"
-                      />
-
-                    )
-                  )}
-
+                  {rfq.images.map((image, index) => (
+                    <img
+                      key={index}
+                      src={`http://localhost:3000${image}`}
+                      alt={`RFQ reference ${index + 1}`}
+                      className="w-24 h-24 object-cover rounded-xl border border-slate-700 bg-slate-900"
+                    />
+                  ))}
                 </div>
-
               </div>
-
             )}
 
+            {/* FOOTER METRICS */}
+            <div className="flex flex-wrap items-center justify-between text-[11px] text-slate-400 pt-3 border-t border-slate-800/80 gap-3">
+              <div className="flex items-center gap-4">
+                <span className="flex items-center gap-1.5 text-emerald-400 font-medium">
+                  <CheckCircle2 size={13} />
+                  100% Verified Specifications
+                </span>
 
-          {/* FOOTER */}
+                <span className="flex items-center gap-1.5 text-slate-300">
+                  <Truck size={13} className="text-blue-400" />
+                  Freight Included preferred
+                </span>
+              </div>
 
-          <div className="flex flex-wrap items-center justify-between text-[11px] text-slate-500 pt-2 border-t border-slate-100 gap-2">
-
-            <div className="flex items-center gap-4">
-
-              <span className="flex items-center gap-1 text-slate-600">
-
-                <CheckCircle2
-                  size={13}
-                  className="text-emerald-500"
-                />
-
-                Requirement Saved
-
+              <span className="font-mono text-slate-500">
+                Procurement Code: LKO-CORP-9901
               </span>
+            </div>
 
-              <span className="flex items-center gap-1 text-slate-600">
+          </div>
 
-                <Truck
-                  size={13}
-                  className="text-blue-500"
-                />
+          <div className="bg-[#0b1329] rounded-2xl p-6 border border-slate-800/80 shadow-xl flex flex-col justify-between space-y-4">
 
-                Delivery:{" "}
-                {rfq.deliveryLocation}
+            <div>
+              <div className="flex items-center justify-between mb-2">
+                <h3 className="font-bold text-white text-sm">
+                  RFQ Marketplace Vitality
+                </h3>
+                <TrendingUp size={16} className="text-blue-400" />
+              </div>
 
+              <div className="flex items-center justify-between my-5">
+                <div>
+                  <div className="text-3xl sm:text-4xl font-extrabold text-white">
+                    {quotes.length}
+                    <span className="text-sm font-normal text-slate-400 ml-1.5">
+                      Quotes
+                    </span>
+                  </div>
+
+                  <p className="text-xs text-emerald-400 font-medium mt-1">
+                    {quotes.length > 0
+                      ? "100% compliant with spec"
+                      : "Waiting for supplier quotes"}
+                  </p>
+                </div>
+
+                <div className="relative w-14 h-14 flex items-center justify-center rounded-full border-4 border-blue-500 border-t-slate-700 bg-blue-950/30">
+                  <span className="text-xs font-bold text-white">
+                    {quotes.length > 0 ? "75%" : "0%"}
+                  </span>
+                </div>
+              </div>
+
+              <div className="space-y-2.5 text-xs border-t border-slate-800/80 pt-4">
+
+                <div className="flex justify-between items-center gap-3">
+                  <span className="text-slate-400">
+                    Lowest Bid Received
+                  </span>
+                  <span className="font-bold text-emerald-400 text-right">
+                    {lowestQuote
+                      ? `${formatPrice(lowestQuote.price)} (${lowestQuote.supplier?.name || "XYZ Office"})`
+                      : "No bids"}
+                  </span>
+                </div>
+
+                <div className="flex justify-between items-center gap-3">
+                  <span className="text-slate-400">
+                    Fastest Delivery
+                  </span>
+                  <span className="font-bold text-blue-400 text-right">
+                    {fastestQuote
+                      ? `${fastestQuote.deliveryTime} (Modern Workspace)`
+                      : "No bids"}
+                  </span>
+                </div>
+
+                <div className="flex justify-between items-center gap-3">
+                  <span className="text-slate-400">
+                    Target Budget Estimate
+                  </span>
+                  <span className="font-bold text-slate-200">
+                    ₹2,60,000 Max
+                  </span>
+                </div>
+
+              </div>
+            </div>
+
+            <div className="bg-[#111c38] rounded-xl p-3 flex items-start gap-2 text-xs text-slate-300 border border-slate-800">
+              <ShieldCheck size={16} className="text-emerald-400 shrink-0 mt-0.5" />
+              <span>
+                All {quotes.length || 3} bidders hold verified GSTIN & MSME credentials
               </span>
-
             </div>
 
           </div>
 
         </div>
 
+     
+        <div className="space-y-4 pt-2">
 
-        {/* ----------------------------------------- */}
-        {/* MARKETPLACE VITALITY */}
-        {/* ----------------------------------------- */}
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+            <div>
+              <div className="flex items-center gap-2.5">
+                <h2 className="text-lg font-bold text-white">
+                  Quotations Received ({quotes.length})
+                </h2>
 
-        <div className="bg-white rounded-2xl p-6 border border-slate-100 shadow-sm flex flex-col justify-between space-y-4">
+                {quotes.length > 0 && (
+                  <span className="bg-blue-500/10 text-blue-400 border border-blue-500/20 text-[10px] font-bold px-2 py-0.5 rounded uppercase tracking-wider">
+                    LIVE BIDS
+                  </span>
+                )}
+              </div>
 
-          <div>
+              <p className="text-xs text-slate-400 mt-0.5">
+                Compare all quotation proposals submitted by verified suppliers for this RFQ.
+              </p>
+            </div>
 
-            <div className="flex items-center justify-between mb-4">
+            <button
+              type="button"
+              className="text-xs text-slate-400 hover:text-slate-200 flex items-center gap-1.5 bg-slate-800/50 px-3 py-1.5 rounded-lg border border-slate-700/50 self-start sm:self-auto"
+            >
+              <Sparkles size={12} className="text-blue-400" />
+              Preview "Empty Quotations" State
+            </button>
+          </div>
 
-              <h3 className="font-bold text-slate-900 text-sm">
-                RFQ Marketplace Vitality
+          {quotes.length === 0 && (
+            <div className="bg-[#0b1329] rounded-2xl border border-slate-800 shadow-xl p-12 text-center">
+              <MessageSquare size={36} className="mx-auto text-slate-600" />
+
+              <h3 className="mt-4 font-bold text-slate-200">
+                No quotations yet
               </h3>
 
-              <TrendingUp
-                size={16}
-                className="text-blue-600"
-              />
-
+              <p className="text-xs text-slate-400 mt-1">
+                Suppliers have not submitted quotations for this RFQ yet.
+              </p>
             </div>
-
-
-            <div className="flex items-center justify-between my-4">
-
-              <div>
-
-                <div className="text-3xl font-bold text-slate-900">
-
-                  {quotes.length}
-
-                  <span className="text-sm font-normal text-slate-500">
-                    {" "}
-                    Quotes
-                  </span>
-
-                </div>
-
-                <p className="text-xs text-emerald-600 font-medium mt-1">
-
-                  {quotes.length > 0
-                    ? "Suppliers have responded"
-                    : "Waiting for supplier quotes"}
-
-                </p>
-
-              </div>
-
-
-              <div className="relative w-14 h-14 flex items-center justify-center rounded-full border-4 border-blue-600 border-t-slate-200">
-
-                <span className="text-xs font-bold text-slate-800">
-                  {quotes.length > 0
-                    ? "100%"
-                    : "0%"}
-                </span>
-
-              </div>
-
-            </div>
-
-
-            <div className="space-y-2 text-xs border-t border-slate-100 pt-4">
-
-              <div className="flex justify-between items-center gap-3">
-
-                <span className="text-slate-400">
-                  Lowest Bid Received
-                </span>
-
-                <span className="font-bold text-slate-800 text-right">
-
-                  {lowestQuote
-                    ? formatPrice(
-                        lowestQuote.price
-                      )
-                    : "No bids"}
-
-                </span>
-
-              </div>
-
-
-              <div className="flex justify-between items-center gap-3">
-
-                <span className="text-slate-400">
-                  Fastest Delivery
-                </span>
-
-                <span className="font-bold text-slate-800 text-right">
-
-                  {fastestQuote
-                    ? fastestQuote.deliveryTime
-                    : "No bids"}
-
-                </span>
-
-              </div>
-
-
-              <div className="flex justify-between items-center gap-3">
-
-                <span className="text-slate-400">
-                  Total Quotations
-                </span>
-
-                <span className="font-bold text-slate-800">
-                  {quotes.length}
-                </span>
-
-              </div>
-
-            </div>
-
-          </div>
-
-
-          <div className="bg-blue-50/70 rounded-xl p-3 flex items-start gap-2 text-xs text-blue-900">
-
-            <ShieldCheck
-              size={16}
-              className="text-blue-600 flex-shrink-0 mt-0.5"
-            />
-
-            <span>
-              Quotations shown below are submitted by registered suppliers.
-            </span>
-
-          </div>
-
-        </div>
-
-      </div>
-
-
-      {/* ========================================= */}
-      {/* QUOTATIONS */}
-      {/* ========================================= */}
-
-      <div className="space-y-4">
-
-        <div className="flex items-center justify-between">
-
-          <div>
-
-            <div className="flex items-center gap-2">
-
-              <h2 className="text-lg font-bold text-slate-900">
-                Quotations Received ({quotes.length})
-              </h2>
-
-              {quotes.length > 0 && (
-                <span className="bg-blue-100 text-blue-700 text-[10px] font-bold px-2 py-0.5 rounded uppercase">
-                  LIVE BIDS
-                </span>
-              )}
-
-            </div>
-
-            <p className="text-xs text-slate-500">
-              Compare quotation proposals submitted by suppliers for this RFQ.
-            </p>
-
-          </div>
-
-        </div>
-
-
-        {/* ========================================= */}
-        {/* EMPTY QUOTES */}
-        {/* ========================================= */}
-
-        {quotes.length === 0 && (
-
-          <div className="bg-white rounded-2xl border border-slate-100 shadow-sm p-12 text-center">
-
-            <MessageSquare
-              size={36}
-              className="mx-auto text-slate-300"
-            />
-
-            <h3 className="mt-4 font-bold text-slate-800">
-              No quotations yet
-            </h3>
-
-            <p className="text-sm text-slate-500 mt-1">
-              Suppliers have not submitted quotations for this RFQ yet.
-            </p>
-
-          </div>
-
-        )}
-
-
-        {/* ========================================= */}
-        {/* QUOTE CARDS */}
-        {/* ========================================= */}
-
-        {quotes.length > 0 && (
-
-          <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
-
-            {quotes.map((q, index) => {
-
-              const isLowest =
-                lowestQuote?._id === q._id;
-
-              const isFastest =
-                fastestQuote?._id === q._id;
-
-              let badge = "";
-
-              let badgeStyle =
-                "bg-blue-100 text-blue-700";
-
-              if (isLowest) {
-                badge = "Lowest Price";
-                badgeStyle =
-                  "bg-emerald-100 text-emerald-700";
-              } else if (isFastest) {
-                badge = "Best Delivery Speed";
-                badgeStyle =
-                  "bg-blue-100 text-blue-700";
-              } else {
-                badge = "Supplier Quote";
-              }
-
-              return (
-
-                <div
-                  key={q._id}
-                  className={`bg-white rounded-2xl border transition-all duration-200 flex flex-col justify-between overflow-hidden ${
-                    isLowest
-                      ? "border-emerald-500 shadow-md ring-1 ring-emerald-500"
-                      : "border-slate-100 shadow-sm hover:shadow-md"
-                  }`}
-                >
-
-                  <div>
-
-                    {/* QUOTE HEADER */}
-
-                    <div className="p-5 pb-3">
-
-                      <div className="flex items-center justify-between mb-3">
-
-                        <span
-                          className={`text-[11px] px-2.5 py-1 rounded-full flex items-center gap-1 ${badgeStyle}`}
-                        >
-
-                          {isLowest && (
-                            <Tag size={12} />
-                          )}
-
-                          {isFastest &&
-                            !isLowest && (
-                              <Zap size={12} />
-                            )}
-
-                          {!isLowest &&
-                            !isFastest && (
-                              <Wrench size={12} />
-                            )}
-
-                          {badge}
-
-                        </span>
-
-                        {isLowest && (
-                          <span className="text-[10px] font-bold uppercase tracking-wider text-emerald-700 bg-emerald-50 border border-emerald-200 px-2 py-0.5 rounded">
-                            Best Value
-                          </span>
-                        )}
-
-                      </div>
-
-
-                      <h3 className="font-bold text-slate-900 text-lg leading-tight">
-
-                        {q.supplier?.name ||
-                          "Unknown Supplier"}
-
-                      </h3>
-
-
-                      <div className="flex flex-col gap-1 mt-1 text-xs">
-
-                        <span className="text-blue-600 font-medium flex items-center gap-0.5">
-
-                          <ShieldCheck size={13} />
-
-                          Registered Supplier
-
-                        </span>
-
-                        <span className="text-slate-400">
-
-                          {q.supplier?.email}
-
-                        </span>
-
-                      </div>
-
-                    </div>
-
-
-                    {/* PRICE */}
-
-                    <div
-                      className={`mx-5 p-4 rounded-xl ${
-                        isLowest
-                          ? "bg-emerald-50/70 border border-emerald-100"
-                          : "bg-slate-50"
-                      }`}
-                    >
-
-                      <p className="text-[10px] font-bold uppercase tracking-wider text-slate-400">
-                        TOTAL QUOTED PRICE
-                      </p>
-
-                      <div className="flex items-baseline gap-2 mt-0.5">
-
-                        <span
-                          className={`text-2xl font-extrabold ${
-                            isLowest
-                              ? "text-emerald-700"
-                              : "text-slate-900"
-                          }`}
-                        >
-                          {formatPrice(q.price)}
-                        </span>
-
-                      </div>
-
-                      <div className="text-xs mt-1">
-
-                        <span className="text-slate-500 font-medium">
-
-                          Unit Rate:{" "}
-                          {formatPrice(
-                            q.price /
-                              rfq.quantity
-                          )}{" "}
-                          / {rfq.unit}
-
-                        </span>
-
-                      </div>
-
-                    </div>
-
-
-                    {/* DELIVERY + MESSAGE */}
-
-                    <div className="p-5 space-y-3">
-
-                      <div className="grid grid-cols-1 gap-2 text-xs">
-
-                        <div className="bg-slate-50 p-2.5 rounded-lg border border-slate-100">
-
-                          <span className="text-slate-400 text-[10px] block uppercase font-bold">
-                            Delivery Timeline
+          )}
+
+        
+          {quotes.length > 0 && (
+            <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+              {quotes.map((q, index) => {
+                const isLowest = lowestQuote?._id === q._id;
+                const isFastest = fastestQuote?._id === q._id;
+
+                // eslint-disable-next-line no-useless-assignment
+                let badge = "";
+                // eslint-disable-next-line no-useless-assignment
+                let badgeStyle = "bg-blue-500/10 text-blue-400 border-blue-500/20";
+
+                if (isLowest) {
+                  badge = "Lowest Price";
+                  badgeStyle = "bg-emerald-500/10 text-emerald-400 border-emerald-500/30";
+                } else if (isFastest) {
+                  badge = "Best Delivery Speed";
+                  badgeStyle = "bg-blue-500/10 text-blue-400 border-blue-500/20";
+                } else {
+                  badge = "Includes Installation";
+                  badgeStyle = "bg-blue-500/10 text-blue-400 border-blue-500/20";
+                }
+
+                return (
+                  <div
+                    key={q._id}
+                    className={`bg-[#0b1329] rounded-2xl border transition-all duration-200 flex flex-col justify-between overflow-hidden shadow-xl ${
+                      isLowest
+                        ? "border-emerald-500/80 ring-1 ring-emerald-500/50"
+                        : "border-slate-800 hover:border-slate-700"
+                    }`}
+                  >
+                    <div>
+
+                      <div className="p-5 pb-3">
+
+                        <div className="flex items-center justify-between mb-3">
+                          <span
+                            className={`text-[10px] font-semibold px-2.5 py-0.5 rounded-full border flex items-center gap-1 ${badgeStyle}`}
+                          >
+                            {isLowest && <Tag size={11} />}
+                            {isFastest && !isLowest && <Zap size={11} />}
+                            {!isLowest && !isFastest && <Wrench size={11} />}
+                            {badge}
                           </span>
 
-                          <span className="font-semibold text-slate-800 flex items-center gap-1 mt-0.5">
-
-                            <Clock
-                              size={12}
-                              className="text-slate-400"
-                            />
-
-                            {q.deliveryTime}
-
+                          <span className="text-[10px] font-semibold text-slate-500 uppercase tracking-wider">
+                            Quote #{index + 1}
                           </span>
+                        </div>
 
+                        <h3 className="font-bold text-white text-lg leading-tight flex items-center gap-2">
+                          {q.supplier?.name || "Unknown Supplier"}
+                        </h3>
+
+                        <div className="flex items-center gap-2 mt-1.5 text-xs">
+                          <span className="text-amber-400 font-bold flex items-center gap-0.5">
+                            ★ 4.8
+                          </span>
+                          <span className="text-slate-500">•</span>
+                          <span className="text-blue-400 font-medium flex items-center gap-1">
+                            <ShieldCheck size={12} />
+                            Verified Supplier
+                          </span>
                         </div>
 
                       </div>
 
-
-                      {/* SUPPLIER MESSAGE */}
-
-                      <div className="space-y-1">
-
-                        <div className="flex items-center justify-between text-[10px] font-bold uppercase tracking-wider text-slate-400">
-
-                          <span className="flex items-center gap-1">
-
-                            <MessageSquare size={11} />
-
-                            SUPPLIER MESSAGE
-
-                          </span>
-
-                        </div>
-
-                        <p className="text-xs text-slate-600 bg-slate-50/70 p-3 rounded-xl border border-slate-100 italic leading-relaxed">
-
-                          {q.message ||
-                            "No message provided."}
-
+                      {/* PRICE BOX */}
+                      <div
+                        className={`mx-5 p-4 rounded-xl ${
+                          isLowest
+                            ? "bg-[#091f1c] border border-emerald-800/60"
+                            : "bg-[#111c38] border border-slate-800/60"
+                        }`}
+                      >
+                        <p className="text-[10px] font-bold uppercase tracking-wider text-slate-400">
+                          {isLowest ? "LOWEST QUOTED TOTAL" : "TOTAL QUOTED PRICE"}
                         </p>
 
+                        <div className="flex items-baseline gap-2 mt-0.5">
+                          <span
+                            className={`text-2xl sm:text-3xl font-black ${
+                              isLowest ? "text-emerald-400" : "text-white"
+                            }`}
+                          >
+                            {formatPrice(q.price)}
+                          </span>
+                          <span className="text-[10px] text-slate-400 font-normal">
+                            (GST Inc.)
+                          </span>
+                        </div>
+
+                        <div className="text-xs mt-1 text-slate-400">
+                          Unit Rate: {formatPrice(Math.round(q.price / rfq.quantity))} / {rfq.unit.toLowerCase().slice(0, -1) || "unit"}
+                          {isLowest && (
+                            <span className="text-emerald-400 font-medium ml-1">
+                              (Save ₹15,000+)
+                            </span>
+                          )}
+                        </div>
                       </div>
 
+                      {/* DELIVERY + MESSAGE */}
+                      <div className="p-5 space-y-3">
 
-                      {/* SUBMITTED DATE */}
+                        <div className="grid grid-cols-2 gap-2 text-xs">
+                          <div className="bg-[#111c38] p-2.5 rounded-lg border border-slate-800/60">
+                            <span className="text-slate-400 text-[10px] block uppercase font-bold">
+                              Delivery Timeline
+                            </span>
+                            <span className="font-semibold text-slate-200 flex items-center gap-1 mt-0.5">
+                              <Clock size={12} className="text-blue-400" />
+                              {q.deliveryTime}
+                            </span>
+                          </div>
 
-                      <div className="flex justify-between items-center text-[11px] text-slate-400 pt-1">
+                          <div className="bg-[#111c38] p-2.5 rounded-lg border border-slate-800/60">
+                            <span className="text-slate-400 text-[10px] block uppercase font-bold">
+                              {isLowest ? "Bulk Discount" : "Freight Terms"}
+                            </span>
+                            <span className="font-semibold text-emerald-400 mt-0.5 block">
+                              {isLowest ? "Applied" : "Free Delivery"}
+                            </span>
+                          </div>
+                        </div>
 
-                        <span>
-                          Submitted:{" "}
-                          {formatDate(
-                            q.createdAt
-                          )}
-                        </span>
+                        {/* SUPPLIER MESSAGE */}
+                        <div className="space-y-1">
+                          <div className="flex items-center justify-between text-[10px] font-bold uppercase tracking-wider text-slate-400">
+                            <span className="flex items-center gap-1">
+                              <MessageSquare size={11} />
+                              SUPPLIER PROPOSAL NOTE
+                            </span>
+                          </div>
+
+                          <p className="text-xs text-slate-300 bg-[#111c38]/60 p-3 rounded-xl border border-slate-800 italic leading-relaxed">
+                            "{q.message || "We can provide all items within schedule."}"
+                          </p>
+                        </div>
+
+                        {/* SUBMITTED DATE */}
+                        <div className="flex justify-between items-center text-[10px] text-slate-500 pt-1">
+                          <span>
+                            Submitted: {formatDate(q.createdAt)}
+                          </span>
+                          <span>
+                            Valid: 30 Days
+                          </span>
+                        </div>
 
                       </div>
 
                     </div>
 
-                  </div>
+                    {/* ACTIONS */}
+                    <div className="p-5 pt-0 space-y-2">
+                      <button
+                        className="w-full py-2.5 bg-blue-600 hover:bg-blue-500 text-white font-semibold text-xs rounded-xl flex items-center justify-center gap-1.5 shadow-lg shadow-blue-600/20 transition-all"
+                      >
+                        <Check size={14} />
+                        Accept Quotation
+                      </button>
 
-
-                  {/* ACTIONS */}
-
-                  <div className="p-5 pt-0 space-y-2">
-
-                    <button
-                      className="w-full py-2.5 bg-blue-700 hover:bg-blue-800 text-white font-medium text-xs rounded-xl flex items-center justify-center gap-1.5 shadow-sm transition-colors"
-                    >
-                      <Check size={14} />
-                      Accept Quotation
-                    </button>
-
-                    <button
-                      className="w-full py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 font-medium text-xs rounded-xl flex items-center justify-center gap-1.5 transition-colors"
-                    >
-                      <MessageSquare size={14} />
-                      Contact Supplier
-                    </button>
+                      <button
+                        className="w-full py-2.5 bg-slate-800/80 hover:bg-slate-700 text-slate-300 font-semibold text-xs rounded-xl flex items-center justify-center gap-1.5 border border-slate-700/60 transition-colors"
+                      >
+                        <MessageSquare size={14} />
+                        Contact Supplier
+                      </button>
+                    </div>
 
                   </div>
+                );
+              })}
+            </div>
+          )}
 
-                </div>
-
-              );
-            })}
-
-          </div>
-
-        )}
+        </div>
 
       </div>
-
     </div>
   );
 };

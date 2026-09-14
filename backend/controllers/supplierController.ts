@@ -1,11 +1,10 @@
+
+
 import { Response } from "express";
 import RFQ from "../models/RFQ";
 import Quote from "../models/Quote";
 import { AuthRequest } from "../middleware/authMiddleware";
-
-// ==========================================
-// GET ALL OPEN RFQs
-// ==========================================
+import mongoose from "mongoose";
 
 export const getAllRFQs = async (
   req: AuthRequest,
@@ -32,10 +31,6 @@ export const getAllRFQs = async (
   }
 };
 
-// ==========================================
-// GET SINGLE RFQ
-// ==========================================
-
 export const getSupplierRFQById = async (
   req: AuthRequest,
   res: Response
@@ -43,8 +38,16 @@ export const getSupplierRFQById = async (
   try {
     const { id } = req.params;
 
+    if (Array.isArray(id) || !mongoose.Types.ObjectId.isValid(id)) {
+      res.status(400).json({
+        message: "Invalid RFQ ID",
+      });
+
+      return;
+    }
+
     const rfq = await RFQ.findOne({
-      _id: id,
+      _id: new mongoose.Types.ObjectId(id),
       status: "open",
     }).populate("buyer", "name email");
 
@@ -68,10 +71,6 @@ export const getSupplierRFQById = async (
   }
 };
 
-// ==========================================
-// SUBMIT QUOTATION
-// ==========================================
-
 export const createQuote = async (
   req: AuthRequest,
   res: Response
@@ -87,25 +86,31 @@ export const createQuote = async (
 
     const { id } = req.params;
 
+    // Validate RFQ ID
+    if (Array.isArray(id) || !mongoose.Types.ObjectId.isValid(id)) {
+      res.status(400).json({
+        message: "Invalid RFQ ID",
+      });
+
+      return;
+    }
+
     const {
       price,
       deliveryTime,
       message,
     } = req.body;
 
-    // -------------------------------
-    // Validation
-    // -------------------------------
-
+    // Validate required fields
     if (!price || !deliveryTime) {
       res.status(400).json({
-        message:
-          "Price and delivery time are required",
+        message: "Price and delivery time are required",
       });
 
       return;
     }
 
+    // Validate price
     if (Number(price) < 0) {
       res.status(400).json({
         message: "Price cannot be negative",
@@ -114,31 +119,21 @@ export const createQuote = async (
       return;
     }
 
-    // -------------------------------
-    // Check RFQ
-    // -------------------------------
-
+    // Find RFQ
     const rfq = await RFQ.findOne({
-      _id: id,
+      _id: new mongoose.Types.ObjectId(id),
       status: "open",
     });
 
     if (!rfq) {
       res.status(404).json({
-        message:
-          "RFQ not found or no longer accepting quotations",
+        message: "RFQ not found or no longer accepting quotations",
       });
 
       return;
     }
 
-    // -------------------------------
-    // Check deadline
-    // -------------------------------
-
-    if (
-      new Date(rfq.deadline) < new Date()
-    ) {
+    if (new Date(rfq.deadline) < new Date()) {
       res.status(400).json({
         message: "Quotation deadline has passed",
       });
@@ -146,31 +141,21 @@ export const createQuote = async (
       return;
     }
 
-    // -------------------------------
-    // Prevent duplicate quote
-    // -------------------------------
-
-    const existingQuote =
-      await Quote.findOne({
-        rfq: id,
-        supplier: req.user.id,
-      });
+    const existingQuote = await Quote.findOne({
+      rfq: new mongoose.Types.ObjectId(id),
+      supplier: req.user.id,
+    });
 
     if (existingQuote) {
       res.status(400).json({
-        message:
-          "You have already submitted a quotation for this RFQ",
+        message: "You have already submitted a quotation for this RFQ",
       });
 
       return;
     }
 
-    // -------------------------------
-    // Create quote
-    // -------------------------------
-
     const quote = await Quote.create({
-      rfq: id,
+      rfq: new mongoose.Types.ObjectId(id),
       supplier: req.user.id,
       price: Number(price),
       deliveryTime,
@@ -178,25 +163,17 @@ export const createQuote = async (
     });
 
     res.status(201).json({
-      message:
-        "Quotation submitted successfully",
+      message: "Quotation submitted successfully",
       quote,
     });
   } catch (error) {
-    console.error(
-      "Create quotation error:",
-      error
-    );
+    console.error("Create quotation error:", error);
 
     res.status(500).json({
       message: "Server error",
     });
   }
 };
-
-// ==========================================
-// GET MY QUOTATIONS
-// ==========================================
 
 export const getMyQuotes = async (
   req: AuthRequest,
@@ -225,10 +202,7 @@ export const getMyQuotes = async (
       quotes,
     });
   } catch (error) {
-    console.error(
-      "Get my quotations error:",
-      error
-    );
+    console.error("Get my quotations error:", error);
 
     res.status(500).json({
       message: "Server error",

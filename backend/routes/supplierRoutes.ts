@@ -12,7 +12,6 @@ import roleMiddleware from "../middleware/roleMiddleware";
 
 const router = Router();
 
-// Browse all RFQs
 router.get(
   "/rfqs",
   authMiddleware,
@@ -20,7 +19,6 @@ router.get(
   getAllRFQs
 );
 
-// View one RFQ
 router.get(
   "/rfqs/:id",
   authMiddleware,
@@ -28,7 +26,6 @@ router.get(
   getSupplierRFQById
 );
 
-// Submit quotation
 router.post(
   "/rfqs/:id/quotes",
   authMiddleware,
@@ -36,7 +33,6 @@ router.post(
   createQuote
 );
 
-// Supplier's quotations
 router.get(
   "/quotes/my",
   authMiddleware,

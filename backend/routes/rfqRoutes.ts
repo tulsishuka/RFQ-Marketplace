@@ -5,7 +5,6 @@ import {
   getMyRFQs,
   getRFQById,
   getRFQQuotes,
-  updateRFQ,
 } from "../controllers/rfqController";
 
 import authMiddleware from "../middleware/authMiddleware";
@@ -34,12 +33,6 @@ router.get(
   authMiddleware,
   roleMiddleware("buyer"),
   getRFQById
-);
-router.put(
-  "/:id",
-  authMiddleware,
-  roleMiddleware("buyer"),
-  updateRFQ
 );
 
 router.get(

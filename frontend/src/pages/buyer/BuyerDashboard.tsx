@@ -1,3 +1,4 @@
+/* eslint-disable react-hooks/set-state-in-effect */
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 
@@ -8,7 +9,6 @@ import {
   Activity,
   MessageSquareQuote,
   CheckCircle,
-  Pencil,
   ChevronRight,
   ShieldCheck,
   ArrowUpRight,
@@ -27,19 +27,6 @@ interface RFQ {
   createdAt: string;
 }
 
-interface Quote {
-  _id: string;
-  rfq: string;
-  supplier: {
-    _id: string;
-    name: string;
-    email: string;
-  };
-  price: number;
-  deliveryTime: string;
-  message: string;
-  createdAt: string;
-}
 
 const BuyerDashboard = () => {
   const navigate = useNavigate();
@@ -50,7 +37,6 @@ const BuyerDashboard = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
-  // Fetch buyer RFQs
   const fetchRFQs = async () => {
     try {
       setLoading(true);
@@ -84,7 +70,6 @@ const BuyerDashboard = () => {
 
       setRfqs(data.rfqs || []);
 
-      // Fetch quotations for every RFQ
       let totalQuotes = 0;
 
       for (const rfq of data.rfqs || []) {
@@ -131,7 +116,6 @@ const BuyerDashboard = () => {
     fetchRFQs();
   }, []);
 
-  // Statistics
   const totalRFQs = rfqs.length;
 
   const activeRFQs = rfqs.filter(
@@ -148,10 +132,10 @@ const BuyerDashboard = () => {
       value: totalRFQs.toString(),
       badge: `${totalRFQs} RFQs created`,
       badgeColor:
-        "text-emerald-600 bg-emerald-50",
+        "text-emerald-400 bg-emerald-500/10 border border-emerald-500/20",
       icon: FileText,
       iconBg:
-        "bg-blue-50 text-blue-600",
+        "bg-slate-800 text-slate-300 border border-slate-700",
     },
 
     {
@@ -159,12 +143,12 @@ const BuyerDashboard = () => {
       value: activeRFQs.toString(),
       badge: `${activeRFQs} Open - Awaiting bids`,
       badgeColor:
-        "text-blue-600 bg-blue-50",
+        "text-blue-400 bg-blue-500/10 border border-blue-500/20",
       icon: Activity,
       iconBg:
-        "bg-indigo-50 text-indigo-600",
+        "bg-blue-900/40 text-blue-400 border border-blue-800/60",
       borderColor:
-        "border-b-2 border-blue-600",
+        "border-b-2 border-b-blue-500",
     },
 
     {
@@ -175,12 +159,12 @@ const BuyerDashboard = () => {
           ? `${quoteCount} Supplier Proposals`
           : "No quotations yet",
       badgeColor:
-        "text-cyan-600 bg-cyan-50",
+        "text-cyan-400 bg-cyan-500/10 border border-cyan-500/20",
       icon: MessageSquareQuote,
       iconBg:
-        "bg-cyan-50 text-cyan-600",
+        "bg-cyan-900/40 text-cyan-400 border border-cyan-800/60",
       borderColor:
-        "border-b-2 border-cyan-500",
+        "border-b-2 border-b-cyan-500",
     },
 
     {
@@ -191,14 +175,13 @@ const BuyerDashboard = () => {
           ? `${closedRFQs} Completed`
           : "No closed RFQs",
       badgeColor:
-        "text-gray-500 bg-gray-50",
+        "text-slate-400 bg-slate-800/80 border border-slate-700/50",
       icon: CheckCircle,
       iconBg:
-        "bg-gray-100 text-gray-600",
+        "bg-slate-800 text-slate-400 border border-slate-700",
     },
   ];
 
-  // Format date
   const formatDate = (
     dateString: string
   ) => {
@@ -214,7 +197,6 @@ const BuyerDashboard = () => {
     );
   };
 
-  // Get image URL
   const getImageUrl = (
     image: string
   ) => {
@@ -228,30 +210,29 @@ const BuyerDashboard = () => {
   };
 
   return (
-    <div className="min-h-screen bg-slate-50/50 p-6 md:p-8 space-y-6 max-w-7xl mx-auto text-slate-800">
 
-      {/* Header */}
-      <div className="bg-white rounded-2xl p-6 border border-slate-100 shadow-sm flex flex-col md:flex-row md:items-center justify-between gap-4">
+  <div className="min-h-screen w-full flex-1 min-w-0  bg-[#070b14]  text-slate-100 p-3 sm:p-4 md:p-6 lg:p-8 space-y-4 sm:space-y-5 lg:space-y-6">
+      <div className="bg-[#0f172a] rounded-2xl p-6 border border-slate-800/80 shadow-lg flex flex-col md:flex-row md:items-center justify-between gap-4">
 
         <div>
           <div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-wider text-slate-400 mb-1">
 
-            <span className="bg-slate-100 text-slate-600 px-2 py-0.5 rounded">
+            <span className="bg-slate-800/80 text-blue-400 px-2.5 py-0.5 rounded border border-blue-500/20">
               Buyer Portal
             </span>
 
             <span>•</span>
 
-            <span>
+            <span className="text-emerald-400">
               Live Data
             </span>
           </div>
 
-          <h1 className="text-2xl font-bold text-slate-900">
+          <h1 className="text-2xl font-bold text-white tracking-tight">
             Welcome back, Buyer
           </h1>
 
-          <p className="text-slate-500 text-sm mt-0.5">
+          <p className="text-emerald-400 text-sm mt-0.5">
             Manage your RFQs and review supplier quotations.
           </p>
         </div>
@@ -260,7 +241,7 @@ const BuyerDashboard = () => {
 
           <button
             type="button"
-            className="flex items-center gap-2 px-4 py-2.5 rounded-xl border border-slate-200 text-slate-700 text-sm font-medium hover:bg-slate-50 transition-colors"
+            className="flex items-center gap-2 px-4 py-2.5 rounded-xl border border-slate-700 bg-slate-800/60 text-slate-200 text-sm font-medium hover:bg-slate-800 transition-colors"
           >
             <SlidersHorizontal size={16} />
             Preferences
@@ -271,7 +252,7 @@ const BuyerDashboard = () => {
             onClick={() =>
               navigate("/buyer/createrfq")
             }
-            className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-blue-700 text-white text-sm font-medium hover:bg-blue-800 shadow-sm transition-colors"
+            className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-500 text-white text-sm font-medium shadow-lg shadow-blue-600/30 transition-all"
           >
             <Plus size={16} />
             Create RFQ
@@ -282,8 +263,8 @@ const BuyerDashboard = () => {
 
       {/* Loading */}
       {loading && (
-        <div className="bg-white rounded-2xl p-10 text-center border border-slate-100">
-          <p className="text-sm text-slate-500">
+        <div className="bg-[#0f172a] rounded-2xl p-10 text-center border border-slate-800">
+          <p className="text-sm text-slate-400">
             Loading your RFQs...
           </p>
         </div>
@@ -291,8 +272,8 @@ const BuyerDashboard = () => {
 
       {/* Error */}
       {error && !loading && (
-        <div className="bg-red-50 border border-red-100 rounded-2xl p-5">
-          <p className="text-sm text-red-600">
+        <div className="bg-red-950/40 border border-red-800/60 rounded-2xl p-5">
+          <p className="text-sm text-red-400">
             {error}
           </p>
         </div>
@@ -311,7 +292,7 @@ const BuyerDashboard = () => {
                 return (
                   <div
                     key={idx}
-                    className={`bg-white rounded-2xl p-5 border border-slate-100 shadow-sm flex flex-col justify-between ${
+                    className={`bg-[#0f172a] rounded-2xl p-5 border border-slate-800/80 shadow-md flex flex-col justify-between ${
                       stat.borderColor || ""
                     }`}
                   >
@@ -322,7 +303,7 @@ const BuyerDashboard = () => {
                           {stat.title}
                         </p>
 
-                        <p className="text-3xl font-bold text-slate-900 mt-1">
+                        <p className="text-3xl font-bold text-white mt-1">
                           {stat.value}
                         </p>
                       </div>
@@ -350,20 +331,19 @@ const BuyerDashboard = () => {
 
           </div>
 
-          {/* Procurement Banner */}
-          <div className="bg-gradient-to-r from-blue-50/60 to-indigo-50/40 rounded-2xl p-6 border border-blue-100/60 flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
+          <div className="bg-[#0f172a] rounded-2xl p-6 border border-slate-800/80 shadow-md flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
 
             <div className="max-w-xl">
 
-              <p className="text-xs font-bold text-blue-700 uppercase tracking-wider mb-1">
+              <p className="text-xs font-bold text-blue-400 uppercase tracking-wider mb-1">
                 Procurement Cycle Velocity
               </p>
 
-              <h2 className="text-xl font-bold text-slate-900">
+              <h2 className="text-xl font-bold text-white">
                 Your procurement dashboard
               </h2>
 
-              <p className="text-xs text-slate-500 mt-1">
+              <p className="text-xs text-slate-400 mt-1">
                 Track your RFQs and supplier quotations from one place.
               </p>
 
@@ -371,14 +351,14 @@ const BuyerDashboard = () => {
 
             <div className="flex items-center gap-4 self-stretch md:self-auto justify-start">
 
-              <div className="bg-white rounded-xl p-3 border border-slate-100 flex items-center gap-3 shadow-sm min-w-[170px]">
+              <div className="bg-[#182238] rounded-xl p-3 border border-slate-700/60 flex items-center gap-3 shadow-inner min-w-[170px]">
 
-                <div className="w-10 h-10 rounded-full border-4 border-blue-600 border-t-blue-100 flex items-center justify-center text-xs font-bold text-blue-700">
+                <div className="w-10 h-10 rounded-full border-4 border-blue-500 border-t-blue-200 flex items-center justify-center text-xs font-bold text-blue-400 bg-blue-950/50">
                   {totalRFQs > 0 ? "100%" : "0%"}
                 </div>
 
                 <div>
-                  <p className="text-xs font-bold text-slate-800">
+                  <p className="text-xs font-bold text-slate-100">
                     RFQs
                   </p>
 
@@ -389,14 +369,14 @@ const BuyerDashboard = () => {
 
               </div>
 
-              <div className="bg-white rounded-xl p-3 border border-slate-100 flex items-center gap-3 shadow-sm min-w-[170px]">
+              <div className="bg-[#182238] rounded-xl p-3 border border-slate-700/60 flex items-center gap-3 shadow-inner min-w-[170px]">
 
-                <div className="w-10 h-10 rounded-full border-4 border-emerald-600 border-t-emerald-100 flex items-center justify-center text-xs font-bold text-emerald-700">
+                <div className="w-10 h-10 rounded-full border-4 border-emerald-500 border-t-emerald-200 flex items-center justify-center text-xs font-bold text-emerald-400 bg-emerald-950/50">
                   {quoteCount}
                 </div>
 
                 <div>
-                  <p className="text-xs font-bold text-slate-800">
+                  <p className="text-xs font-bold text-slate-100">
                     Quotes
                   </p>
 
@@ -410,17 +390,16 @@ const BuyerDashboard = () => {
             </div>
           </div>
 
-          {/* Recent RFQs */}
           <div className="space-y-4">
 
             <div className="flex items-center justify-between">
 
               <div>
-                <h2 className="text-lg font-bold text-slate-900">
+                <h2 className="text-lg font-bold text-white">
                   Recent RFQs
                 </h2>
 
-                <p className="text-xs text-slate-500">
+                <p className="text-xs text-slate-400">
                   Latest requirements posted to the supplier marketplace
                 </p>
               </div>
@@ -430,7 +409,7 @@ const BuyerDashboard = () => {
                 onClick={() =>
                   navigate("/buyer/buyerdetail")
                 }
-                className="text-xs font-semibold text-blue-700 hover:text-blue-800 flex items-center gap-1"
+                className="text-xs font-semibold text-blue-400 hover:text-blue-300 flex items-center gap-1 transition-colors"
               >
                 View All RFQs
                 <ArrowUpRight size={14} />
@@ -438,20 +417,19 @@ const BuyerDashboard = () => {
 
             </div>
 
-            {/* Empty State */}
             {rfqs.length === 0 && (
-              <div className="bg-white rounded-2xl p-12 border border-slate-100 shadow-sm text-center">
+              <div className="bg-[#0f172a] rounded-2xl p-12 border border-slate-800/80 text-center">
 
                 <FileText
                   size={40}
-                  className="mx-auto text-slate-300 mb-3"
+                  className="mx-auto text-slate-600 mb-3"
                 />
 
-                <h3 className="font-semibold text-slate-800">
+                <h3 className="font-semibold text-slate-200">
                   No RFQs yet
                 </h3>
 
-                <p className="text-sm text-slate-500 mt-1">
+                <p className="text-sm text-slate-400 mt-1">
                   Create your first RFQ to start receiving supplier quotations.
                 </p>
 
@@ -460,7 +438,7 @@ const BuyerDashboard = () => {
                   onClick={() =>
                     navigate("/buyer/createrfq")
                   }
-                  className="mt-5 inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-blue-700 text-white text-sm font-medium hover:bg-blue-800"
+                  className="mt-5 inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-blue-600 text-white text-sm font-medium hover:bg-blue-500 shadow-lg shadow-blue-600/30 transition-all"
                 >
                   <Plus size={16} />
                   Create RFQ
@@ -469,7 +447,6 @@ const BuyerDashboard = () => {
               </div>
             )}
 
-            {/* RFQ Cards */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
 
               {rfqs.slice(0, 4).map(
@@ -484,23 +461,22 @@ const BuyerDashboard = () => {
                   const statusColor =
                     rfq.status ===
                     "open"
-                      ? "bg-emerald-100 text-emerald-700"
-                      : "bg-gray-100 text-gray-600";
+                      ? "bg-emerald-500/10 text-emerald-400 border border-emerald-500/30"
+                      : "bg-slate-800 text-slate-400 border border-slate-700";
 
                   return (
                     <div
                       key={rfq._id}
-                      className="bg-white rounded-2xl p-5 border border-slate-100 shadow-sm flex flex-col justify-between hover:shadow-md transition-shadow"
+                      className="bg-[#0f172a] rounded-2xl p-5 border border-slate-800/80 shadow-md flex flex-col justify-between hover:border-slate-700 transition-all"
                     >
 
                       <div>
 
-                        {/* Card Top */}
                         <div className="flex items-start justify-between gap-3 mb-3">
 
                           <div className="flex items-center gap-3">
 
-                            <div className="w-11 h-11 bg-slate-100 rounded-lg overflow-hidden flex-shrink-0 flex items-center justify-center">
+                            <div className="w-11 h-11 bg-slate-800 rounded-lg overflow-hidden flex-shrink-0 flex items-center justify-center border border-slate-700">
 
                               {rfq.images &&
                               rfq.images.length >
@@ -517,14 +493,14 @@ const BuyerDashboard = () => {
                               ) : (
                                 <FileText
                                   size={18}
-                                  className="text-slate-400"
+                                  className="text-slate-500"
                                 />
                               )}
 
                             </div>
 
                             <div>
-                              <h3 className="font-bold text-slate-900 text-base leading-tight">
+                              <h3 className="font-bold text-white text-base leading-tight">
                                 {
                                   rfq.productService
                                 }
@@ -548,22 +524,20 @@ const BuyerDashboard = () => {
 
                         </div>
 
-                        {/* Description */}
-                        <p className="text-xs text-slate-600 mb-4 line-clamp-2">
+                        <p className="text-xs text-slate-300 mb-4 line-clamp-2">
                           {
                             rfq.description
                           }
                         </p>
 
-                        {/* Information */}
-                        <div className="bg-slate-50 rounded-xl p-3 grid grid-cols-3 gap-2 mb-4">
+                        <div className="bg-[#182238]/60 rounded-xl p-3 grid grid-cols-3 gap-2 mb-4 border border-slate-800">
 
                           <div>
                             <p className="text-[10px] uppercase font-bold text-slate-400 tracking-wider">
                               Quantity
                             </p>
 
-                            <p className="text-xs font-bold text-slate-800 mt-0.5">
+                            <p className="text-xs font-bold text-slate-100 mt-0.5">
                               {
                                 rfq.quantity
                               }{" "}
@@ -578,7 +552,7 @@ const BuyerDashboard = () => {
                               Location
                             </p>
 
-                            <p className="text-xs font-bold text-slate-800 mt-0.5 truncate">
+                            <p className="text-xs font-bold text-slate-100 mt-0.5 truncate">
                               {
                                 rfq.deliveryLocation
                               }
@@ -590,7 +564,7 @@ const BuyerDashboard = () => {
                               Deadline
                             </p>
 
-                            <p className="text-xs font-bold text-slate-800 mt-0.5">
+                            <p className="text-xs font-bold text-slate-100 mt-0.5">
                               {
                                 formatDate(
                                   rfq.deadline
@@ -603,29 +577,15 @@ const BuyerDashboard = () => {
 
                       </div>
 
-                      {/* Footer */}
-                      <div className="flex items-center justify-between pt-2 border-t border-slate-100">
+                      <div className="flex items-center justify-between pt-2 border-t border-slate-800">
 
-                        <span className="text-xs font-medium px-3 py-1.5 rounded-lg bg-blue-50 text-blue-700">
+                        <span className="text-xs font-medium px-3 py-1.5 rounded-lg bg-blue-950/60 text-blue-400 border border-blue-900/40">
                           View quotations
                         </span>
 
                         <div className="flex items-center gap-2">
 
-                          <button
-                            type="button"
-                            onClick={() =>
-                              navigate(
-                                `/buyer/buyerdetail?id=${rfq._id}`
-                              )
-                            }
-                            className="flex items-center gap-1 text-xs font-semibold text-slate-600 hover:text-slate-900 px-3 py-2 rounded-lg border border-slate-200 transition-colors"
-                          >
-                            <Pencil
-                              size={13}
-                            />
-                            Edit
-                          </button>
+                          
 
                           <button
                             type="button"
@@ -634,7 +594,7 @@ const BuyerDashboard = () => {
                                 `/buyer/buyerdetail?id=${rfq._id}`
                               )
                             }
-                            className="flex items-center gap-1 text-xs font-semibold text-white bg-blue-700 hover:bg-blue-800 px-3 py-2 rounded-lg transition-colors"
+                            className="flex items-center gap-1 text-xs font-semibold text-white bg-blue-600 hover:bg-blue-500 px-3 py-2 rounded-lg transition-colors shadow-md shadow-blue-600/20"
                           >
                             View Details
                             <ChevronRight
@@ -655,16 +615,15 @@ const BuyerDashboard = () => {
 
           </div>
 
-          {/* Bottom Banner */}
-          <div className="bg-blue-900 text-white rounded-2xl p-5 flex flex-col md:flex-row items-start md:items-center justify-between gap-4 relative overflow-hidden">
+          <div className="bg-gradient-to-r from-blue-950 via-[#0d1b3e] to-[#0f172a] text-white rounded-2xl p-5 border border-blue-900/50 flex flex-col md:flex-row items-start md:items-center justify-between gap-4 relative overflow-hidden shadow-lg">
 
             <div className="space-y-1 relative z-10">
 
-              <div className="flex items-center gap-1.5 text-blue-200 text-xs font-bold uppercase tracking-wider">
+              <div className="flex items-center gap-1.5 text-blue-400 text-xs font-bold uppercase tracking-wider">
 
                 <ShieldCheck
                   size={16}
-                  className="text-blue-300"
+                  className="text-blue-400"
                 />
 
                 <span>
@@ -673,22 +632,16 @@ const BuyerDashboard = () => {
 
               </div>
 
-              <p className="font-bold text-base">
+              <p className="font-bold text-base text-white">
                 Simple 3-Step Buyer Workflow
               </p>
 
-              <p className="text-xs text-blue-200">
+              <p className="text-xs text-slate-300">
                 1. Post Requirement → 2. Compare Supplier Quotations → 3. Connect directly without hidden fees.
               </p>
 
             </div>
 
-            <button
-              type="button"
-              className="relative z-10 bg-white text-blue-900 text-xs font-semibold px-4 py-2.5 rounded-xl hover:bg-blue-50 transition-colors flex-shrink-0"
-            >
-              Learn Guidelines
-            </button>
 
           </div>
 

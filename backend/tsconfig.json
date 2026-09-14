@@ -1,3 +1,5 @@
+
+
 {
   "compilerOptions": {
     "target": "ES2020",
@@ -8,7 +10,8 @@
     "esModuleInterop": true,
     "strict": true,
     "skipLibCheck": true,
-    "forceConsistentCasingInFileNames": true
+    "forceConsistentCasingInFileNames": true,
+    "ignoreDeprecations": "6.0"
   },
   "include": [
     "**/*.ts"
