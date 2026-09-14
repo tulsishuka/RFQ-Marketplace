@@ -33,7 +33,7 @@ const Signup = () => {
 
   try {
     const response = await fetch(
-      "http://localhost:3000/api/auth/register",
+      "https://rfq-marketplace-502m.onrender.com/api/auth/register",
       {
         method: "POST",
         headers: {
