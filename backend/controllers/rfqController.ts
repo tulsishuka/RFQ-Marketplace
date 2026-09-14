@@ -5,6 +5,91 @@ import Quote from "../models/Quote";
 
 import { AuthRequest } from "../middleware/authMiddleware";
 
+// export const createRFQ = async (
+//   req: AuthRequest,
+//   res: Response
+// ): Promise<void> => {
+//   try {
+//     if (!req.user) {
+//       res.status(401).json({
+//         message: "Authentication required",
+//       });
+//       return;
+//     }
+
+//     const {
+//       productService,
+//       description,
+//       quantity,
+//       unit,
+//       deliveryLocation,
+//       deadline,
+//     } = req.body;
+
+//     if (
+//       !productService ||
+//       !description ||
+//       !quantity ||
+//       !unit ||
+//       !deliveryLocation ||
+//       !deadline
+//     ) {
+//       res.status(400).json({
+//         message: "All RFQ fields are required",
+//       });
+//       return;
+//     }
+
+//     const allowedUnits = [
+//       "Units",
+//       "Pcs",
+//       "Bays",
+//       "Kg",
+//     ];
+
+//     if (!allowedUnits.includes(unit)) {
+//       res.status(400).json({
+//         message: "Invalid unit",
+//       });
+//       return;
+//     }
+
+//     const images =
+//       Array.isArray(req.files)
+//         ? req.files.map(
+//             (file) =>
+//               `/uploads/${file.filename}`
+//           )
+//         : [];
+
+//     const rfq = await RFQ.create({
+//       buyer: req.user.id,
+//       productService,
+//       description,
+//       quantity: Number(quantity),
+//       unit,
+//       deliveryLocation,
+//       deadline,
+//       images,
+//       status: "open",
+//     });
+
+//     res.status(201).json({
+//       message: "RFQ created successfully",
+//       rfq,
+//     });
+//   } catch (error) {
+//     console.error(
+//       "Create RFQ error:",
+//       error
+//     );
+
+//     res.status(500).json({
+//       message: "Server error",
+//     });
+//   }
+// };
+
 export const createRFQ = async (
   req: AuthRequest,
   res: Response
@@ -54,13 +139,18 @@ export const createRFQ = async (
       return;
     }
 
-    const images =
-      Array.isArray(req.files)
-        ? req.files.map(
-            (file) =>
-              `/uploads/${file.filename}`
-          )
-        : [];
+    // Render backend URL
+    const backendUrl =
+      process.env.BACKEND_URL ||
+      `http://localhost:${process.env.PORT || 3000}`;
+
+    // Create complete image URLs
+    const images = Array.isArray(req.files)
+      ? req.files.map(
+          (file) =>
+            `${backendUrl}/uploads/${file.filename}`
+        )
+      : [];
 
     const rfq = await RFQ.create({
       buyer: req.user.id,
@@ -79,16 +169,14 @@ export const createRFQ = async (
       rfq,
     });
   } catch (error) {
-    console.error(
-      "Create RFQ error:",
-      error
-    );
+    console.error("Create RFQ error:", error);
 
     res.status(500).json({
       message: "Server error",
     });
   }
 };
+
 
 export const getMyRFQs = async (
   req: AuthRequest,
