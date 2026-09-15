@@ -57,11 +57,7 @@ export const createRFQ = async (
       return;
     }
 
-    // const images = Array.isArray(req.files)
-    //   ? req.files.map(
-    //       (file) => `/uploads/${file.filename}`
-    //     )
-    //   : [];
+
 
   const images: string[] = [];
 
@@ -80,7 +76,6 @@ if (Array.isArray(req.files)) {
 
     images.push(result.secure_url);
 
-    // Remove temporary local file
     await fs.unlink(file.path);
   }
 }
