@@ -200,15 +200,7 @@ const BuyerDashboard = () => {
   
 
 
-//   const getImageUrl = (image: string) => {
-//   if (!image) return "";
 
-//   if (image.startsWith("http")) {
-//     return image;
-//   }
-
-//   return `https://rfq-marketplace-502m.onrender.com${image}`;
-// };
 
 
 
