@@ -90,12 +90,42 @@ const BrowseRFQs = () => {
     });
   };
 
-  const getRFQImage = (rfq: RFQ) => {
-    if (rfq.images && rfq.images.length > 0) {
-      return `https://rfq-marketplace-502m.onrender.com/${rfq.images[0]}`;
-    }
+ const getRFQImage = (rfq: RFQ) => {
+  if (!rfq.images || rfq.images.length === 0) {
     return "";
-  };
+  }
+
+  const image = rfq.images[0];
+
+  // Old images saved with localhost
+  if (image.includes("localhost:3000")) {
+    const path = image.split("localhost:3000")[1];
+
+    return `https://rfq-marketplace-502m.onrender.com${path}`;
+  }
+
+  // Already deployed backend URL
+  if (
+    image.startsWith(
+      "https://rfq-marketplace-502m.onrender.com"
+    )
+  ) {
+    return image;
+  }
+
+  // Any other complete URL
+  if (
+    image.startsWith("http://") ||
+    image.startsWith("https://")
+  ) {
+    return image;
+  }
+
+  // New images saved as /uploads/image.png
+  const cleanImage = image.replace(/^\/+/, "");
+
+  return `https://rfq-marketplace-502m.onrender.com/${cleanImage}`;
+};
 
   if (loading) {
     return (
