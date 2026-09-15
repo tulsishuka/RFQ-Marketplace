@@ -68,14 +68,12 @@ const BuyerRFQDetails = () => {
   const getImageUrl = (image: string) => {
   if (!image) return "";
 
-  // Old images saved with localhost
   if (image.includes("localhost:3000")) {
     const path = image.split("localhost:3000")[1];
 
     return `https://rfq-marketplace-502m.onrender.com${path}`;
   }
 
-  // Already deployed backend URL
   if (
     image.startsWith(
       "https://rfq-marketplace-502m.onrender.com"
@@ -84,7 +82,6 @@ const BuyerRFQDetails = () => {
     return image;
   }
 
-  // Any other complete URL
   if (
     image.startsWith("http://") ||
     image.startsWith("https://")
@@ -92,7 +89,6 @@ const BuyerRFQDetails = () => {
     return image;
   }
 
-  // Relative path: /uploads/image.png
   const cleanImage = image.replace(/^\/+/, "");
 
   return `https://rfq-marketplace-502m.onrender.com/${cleanImage}`;
@@ -402,24 +398,7 @@ console.log("RFQ IMAGES:", rfqData.rfq?.images);
               </div>
             </div>
 
-            {/* {rfq.images && rfq.images.length > 0 && (
-              <div className="space-y-2">
-                <p className="text-[10px] font-bold uppercase tracking-wider text-slate-400">
-                  REFERENCE IMAGES
-                </p>
-
-                <div className="flex flex-wrap gap-3">
-                  {rfq.images.map((image, index) => (
-                    <img
-                      key={index}
-                      src={`https://rfq-marketplace-502m.onrender.com/${image}`}
-                      alt={`RFQ reference ${index + 1}`}
-                      className="w-24 h-24 object-cover rounded-xl border border-slate-700 bg-slate-900"
-                    />
-                  ))}
-                </div>
-              </div>
-            )} */}
+         
 
             {rfq.images.map((image, index) => {
   const imageUrl = getImageUrl(image);
