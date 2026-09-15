@@ -197,27 +197,52 @@ const BuyerDashboard = () => {
     );
   };
 
-  // const getImageUrl = (
-  //   image: string
-  // ) => {
-  //   if (!image) return "";
-
-  //   if (image.startsWith("http")) {
-  //     return image;
-  //   }
-
-  //   return `https://rfq-marketplace-502m.onrender.com/${image}`;
-  // };
+  
 
 
-  const getImageUrl = (image: string) => {
+//   const getImageUrl = (image: string) => {
+//   if (!image) return "";
+
+//   if (image.startsWith("http")) {
+//     return image;
+//   }
+
+//   return `https://rfq-marketplace-502m.onrender.com${image}`;
+// };
+
+
+
+const getImageUrl = (image: string) => {
   if (!image) return "";
 
-  if (image.startsWith("http")) {
+  // Old images saved with localhost
+  if (image.includes("localhost:3000")) {
+    const path = image.split("localhost:3000")[1];
+
+    return `https://rfq-marketplace-502m.onrender.com${path}`;
+  }
+
+  // Already deployed backend URL
+  if (
+    image.startsWith(
+      "https://rfq-marketplace-502m.onrender.com"
+    )
+  ) {
     return image;
   }
 
-  return `https://rfq-marketplace-502m.onrender.com${image}`;
+  // Any other complete URL
+  if (
+    image.startsWith("http://") ||
+    image.startsWith("https://")
+  ) {
+    return image;
+  }
+
+  // Relative path: /uploads/image.png
+  const cleanImage = image.replace(/^\/+/, "");
+
+  return `https://rfq-marketplace-502m.onrender.com/${cleanImage}`;
 };
 
   return (
@@ -664,3 +689,4 @@ const BuyerDashboard = () => {
 };
 
 export default BuyerDashboard;
+
