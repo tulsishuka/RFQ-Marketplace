@@ -1,98 +1,11 @@
 import { Response } from "express";
+import fs from "fs/promises";
 
 import RFQ from "../models/RFQ";
 import Quote from "../models/Quote";
 
 import { AuthRequest } from "../middleware/authMiddleware";
-
-
-// export const createRFQ = async (
-//   req: AuthRequest,
-//   res: Response
-// ): Promise<void> => {
-//   try {
-//     if (!req.user) {
-//       res.status(401).json({
-//         message: "Authentication required",
-//       });
-//       return;
-//     }
-
-//     const {
-//       productService,
-//       description,
-//       quantity,
-//       unit,
-//       deliveryLocation,
-//       deadline,
-//     } = req.body;
-
-//     if (
-//       !productService ||
-//       !description ||
-//       !quantity ||
-//       !unit ||
-//       !deliveryLocation ||
-//       !deadline
-//     ) {
-//       res.status(400).json({
-//         message: "All RFQ fields are required",
-//       });
-//       return;
-//     }
-
-//     const allowedUnits = [
-//       "Units",
-//       "Pcs",
-//       "Bays",
-//       "Kg",
-//     ];
-
-//     if (!allowedUnits.includes(unit)) {
-//       res.status(400).json({
-//         message: "Invalid unit",
-//       });
-//       return;
-//     }
-
-//     // Render backend URL
-//     const backendUrl =
-//       process.env.BACKEND_URL ||
-//       `http://localhost:${process.env.PORT || 3000}`;
-
-//     // Create complete image URLs
-//     const images = Array.isArray(req.files)
-//       ? req.files.map(
-//           (file) =>
-//             `${backendUrl}/uploads/${file.filename}`
-//         )
-//       : [];
-
-//     const rfq = await RFQ.create({
-//       buyer: req.user.id,
-//       productService,
-//       description,
-//       quantity: Number(quantity),
-//       unit,
-//       deliveryLocation,
-//       deadline,
-//       images,
-//       status: "open",
-//     });
-
-//     res.status(201).json({
-//       message: "RFQ created successfully",
-//       rfq,
-//     });
-//   } catch (error) {
-//     console.error("Create RFQ error:", error);
-
-//     res.status(500).json({
-//       message: "Server error",
-//     });
-//   }
-// };
-
+import cloudinary from "../config/cloudinary";
 
 
 export const createRFQ = async (
@@ -144,12 +57,33 @@ export const createRFQ = async (
       return;
     }
 
-    // Save only the relative image path
-    const images = Array.isArray(req.files)
-      ? req.files.map(
-          (file) => `/uploads/${file.filename}`
-        )
-      : [];
+    // const images = Array.isArray(req.files)
+    //   ? req.files.map(
+    //       (file) => `/uploads/${file.filename}`
+    //     )
+    //   : [];
+
+  const images: string[] = [];
+
+if (Array.isArray(req.files)) {
+  for (const file of req.files) {
+    console.log("Uploading file:", file.path);
+
+    const result = await cloudinary.uploader.upload(
+      file.path,
+      {
+        folder: "rfq-marketplace",
+      }
+    );
+
+    console.log("Cloudinary URL:", result.secure_url);
+
+    images.push(result.secure_url);
+
+    // Remove temporary local file
+    await fs.unlink(file.path);
+  }
+}
 
     const rfq = await RFQ.create({
       buyer: req.user.id,
