@@ -189,6 +189,7 @@ console.log("IMAGE URL:", data.rfq?.images?.[0]);
     );
   }
 
+  
   const formatDate = (date: string) =>
     new Date(date).toLocaleDateString("en-IN", {
       day: "2-digit",
