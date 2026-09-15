@@ -197,17 +197,28 @@ const BuyerDashboard = () => {
     );
   };
 
-  const getImageUrl = (
-    image: string
-  ) => {
-    if (!image) return "";
+  // const getImageUrl = (
+  //   image: string
+  // ) => {
+  //   if (!image) return "";
 
-    if (image.startsWith("http")) {
-      return image;
-    }
+  //   if (image.startsWith("http")) {
+  //     return image;
+  //   }
 
-    return `https://rfq-marketplace-502m.onrender.com/${image}`;
-  };
+  //   return `https://rfq-marketplace-502m.onrender.com/${image}`;
+  // };
+
+
+  const getImageUrl = (image: string) => {
+  if (!image) return "";
+
+  if (image.startsWith("http")) {
+    return image;
+  }
+
+  return `https://rfq-marketplace-502m.onrender.com${image}`;
+};
 
   return (
 
